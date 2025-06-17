@@ -1,0 +1,12 @@
+.App {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+}
+
+.UI {
+    position: absolute;
+
+    font-family: 'Courier New', Courier, monospace;
+}

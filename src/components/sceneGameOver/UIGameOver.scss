@@ -1,0 +1,39 @@
+.GameOver {
+    display: flex;
+    justify-content: space-around;
+    flex-direction: column;
+    align-items: center;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    backdrop-filter: blur(5px);
+    color: white;
+    user-select: none;
+
+    .overTitle{
+        font-size: 5vh;
+    }
+    .overButton {
+        cursor: pointer;
+        text-shadow: #fc0 1px 0 10px;
+        font-size: 5vh;
+        width: 30vh;
+        height: 30vh;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #002142, #1a009b);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 2px solid rgb(55, 55, 55);
+        box-shadow:
+            0 12px 24px rgba(0, 0, 0, 0.3),
+            0 -12px 24px rgba(0, 0, 0, 0.3),
+            12px 0 24px rgba(0, 0, 0, 0.3),
+            -12px 0 24px rgba(0, 0, 0, 0.3);
+
+        &:hover {
+            background: linear-gradient(45deg, #002953, #1d01aa);
+        }
+    }
+}
