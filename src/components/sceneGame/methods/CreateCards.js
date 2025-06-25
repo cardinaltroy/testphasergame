@@ -38,6 +38,7 @@ export function CreateCards() {
                     .setInteractive()
                     .setScale(1.5);
                 cardSprite.setData('cell', cell);
+                cardSprite.setData('suit', suit);
                 cardSprite.setData('originalX', cell.x);
                 cardSprite.setData('originalY', cell.y);
                 this.input.setDraggable(cardSprite);
@@ -59,6 +60,7 @@ export function CreateCards() {
                     .setInteractive()
                     .setScale(1.5);
                 cardSprite.setData('cell', cell);
+                cardSprite.setData('suit', suit);
                 cardSprite.setData('originalX', cell.x);
                 cardSprite.setData('originalY', cell.y);
                 this.input.setDraggable(cardSprite);

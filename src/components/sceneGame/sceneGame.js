@@ -5,11 +5,11 @@ import { RefreshLastCards } from './methods/RefreshLastCards';
 import { IsGameOver } from './methods/IsGameOver';
 import { UtilsGetCardValue } from './methods/UtilsGetCardValue';
 import { UtilsGetNearestFreeCell } from './methods/UtilsGetNearestFreeCell';
-import { CreateDeck } from './methods/CreateDeck';
 import { CreateGrid } from './methods/CreateGrid';
-import { ArrangeCards } from './methods/ArrangeCards';
 import { UpdateCellHints } from './methods/UpdateCellHints';
 import { CreateCards } from './methods/CreateCards';
+import { CheckFinishedLines } from './methods/CheckFinishedLines';
+import { UtilsSpawnEffects } from './methods/UtilsSpawnEffects';
 
 export class sceneGame extends Phaser.Scene {
     constructor() {
@@ -25,18 +25,18 @@ export class sceneGame extends Phaser.Scene {
 
         //methods
         this.CreateGrid = CreateGrid.bind(this);
-        this.CreateDeck = CreateDeck.bind(this);
         this.CreateCards = CreateCards.bind(this);
-        this.ArrangeCards = ArrangeCards.bind(this);
         this.UpdateCellHints = UpdateCellHints.bind(this);
 
         this.UndoMove = UndoMove.bind(this);
         this.RefreshLastCards = RefreshLastCards.bind(this);
         this.IsGameOver = IsGameOver.bind(this);
+        this.CheckFinishedLines = CheckFinishedLines.bind(this);
 
 
         this.UtilsGetCardValue = UtilsGetCardValue.bind(this);
         this.UtilsGetNearestFreeCell = UtilsGetNearestFreeCell.bind(this);
+        this.UtilsSpawnEffects = UtilsSpawnEffects.bind(this);
     }
 
     config() {
@@ -59,22 +59,26 @@ export class sceneGame extends Phaser.Scene {
             frameWidth: this.cardWidth,
             frameHeight: this.cardHeight,
         });
-        this.load.audio('drag', './drag.wav');
-    }
-    create() {
-        this.config()// якщо переключили складність то оновлюємо конфіг
 
-        this.add.image(0, 0, 'back') // задній фон
+        this.load.audio('drag', './drag.wav');
+
+        this.load.image('sparkGreen', './sparkGreen.webp');
+        this.load.image('sparkRed', './sparkRed.webp');
+    }
+
+    create() {
+        this.config();
+
+        this.add.image(0, 0, 'back')
             .setOrigin(0, 0)
             .setDisplaySize(this.cameras.main.width, this.cameras.main.height);
 
         this.CreateGrid();
         this.CreateCards();
-        //this.CreateDeck();
-        //this.ArrangeCards();
+        this.CheckFinishedLines();
 
         this.input.on('dragstart', (pointer, gameObject) => {
-            this.children.bringToTop(gameObject); // карта завжди зверху
+            this.children.bringToTop(gameObject);
         });
 
         this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
@@ -83,14 +87,12 @@ export class sceneGame extends Phaser.Scene {
         });
 
         this.input.on('dragend', (pointer, card) => {
-            // шукаємо найближчий слот
             const nearest = this.UtilsGetNearestFreeCell(card.x, card.y);
 
             if (nearest) {
-                // записуємо звідки і яку забираємо карту
                 const oldCell = card.getData('cell');
                 const draggedValue = this.UtilsGetCardValue(card);
-                // чи можемо підставити карту, враховуючи ту що стоїть зліва
+
                 const leftCell = this.grid.find(c =>
                     c.row === nearest.row &&
                     c.col === nearest.col - 1
@@ -102,6 +104,9 @@ export class sceneGame extends Phaser.Scene {
                 const validMove = leftCard && leftValue + 1 === draggedValue;
 
                 if (validMove) {
+                    // Создаём эффект частиц в точке отпускания
+                    this.UtilsSpawnEffects(pointer, 'sparkGreen', 1.2);
+
                     this.sound.play('drag');
                     this.tweens.add({
                         targets: card,
@@ -111,7 +116,7 @@ export class sceneGame extends Phaser.Scene {
                         duration: 100,
                         ease: 'Power2'
                     });
-                    // стейт для кнопки UNDO
+
                     this.lastMove = {
                         card: card,
                         oldX: card.getData('originalX'),
@@ -120,41 +125,50 @@ export class sceneGame extends Phaser.Scene {
                         nearest: nearest,
                     };
 
-                    // слот обнуляємо з якого забираємо карту
                     oldCell.occupied = false;
                     oldCell.card = null;
 
-                    // в карту записуємо нові дані
                     card.x = nearest.x;
                     card.y = nearest.y;
                     card.setData('cell', nearest);
                     card.setData('originalX', nearest.x);
                     card.setData('originalY', nearest.y);
 
-                    //прописуємо в новий слот карту
                     nearest.occupied = true;
                     nearest.card = card;
 
-                    //всякі дрібниці та перерендер підсказок
                     engineStore.addMoves();
                     engineStore.addScores();
                     this.UpdateCellHints();
+                    this.CheckFinishedLines();
                 } else {
-                    // Не можемо в цей слот поставити, повертаєм назад
-                    card.x = card.getData('originalX');
-                    card.y = card.getData('originalY');
-                }
 
+                    this.UtilsSpawnEffects(pointer, 'sparkRed', 0.2);
+
+                    this.tweens.add({
+                        targets: card,
+                        x: card.getData('originalX'),
+                        y: card.getData('originalY'),
+                        duration: 200,
+                        ease: 'Power2'
+                    });
+                }
             } else {
-                // Слоту не знайшли, повертаємся
-                card.x = card.getData('originalX');
-                card.y = card.getData('originalY');
+                this.UtilsSpawnEffects(pointer, 'sparkRed', 0.2);
+                this.tweens.add({
+                    targets: card,
+                    x: card.getData('originalX'),
+                    y: card.getData('originalY'),
+                    duration: 300,
+                    ease: 'Power2'
+                });
             }
 
-            //Після перетягувань перевірити чи гру завершено 
             this.IsGameOver();
         });
     }
+
+
     update(time, delta) {
         this.elapsed += delta
 

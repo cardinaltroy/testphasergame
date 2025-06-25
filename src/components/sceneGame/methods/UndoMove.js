@@ -5,7 +5,7 @@ export function UndoMove() {
         const {
             card, // карта
             oldX, // координати звідки ми перетягували 
-            oldY, 
+            oldY,
             oldCell, // і слот сітки з якого перетянули карту
             nearest  // а а це слот в який ми закинули карту, щоб при ундо його обнулити і підказки працювали коорректно
         } = this.lastMove;
@@ -27,10 +27,14 @@ export function UndoMove() {
         card.setData('cell', oldCell);
         card.setData('originalX', oldX);
         card.setData('originalY', oldY);
+        card.clearTint();
+        card.setInteractive();
+        card.setData('locked', false);
 
         this.lastMove = null; // чистим "історію"
 
         //обновити підсказки
         this.UpdateCellHints();
+        this.CheckFinishedLines();
     }
 }

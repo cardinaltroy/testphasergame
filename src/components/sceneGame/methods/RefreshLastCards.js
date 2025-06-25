@@ -1,39 +1,38 @@
 import Phaser from 'phaser';
 
 export function RefreshLastCards() {
-    // Перемішати карти якщо в не осталось ходів
-    const reshuffleCols = this.difficultMode === 0 ? 3 : 5; // 3 або 5 колонок будемо перемішувати
+    const reshuffleCols = this.difficultMode === 0 ? 3 : 5; // 3 или 5 колонок
 
-    // сюди всі карти напушимо які будемо перемішувати
-    const targetCols = []; 
+    const targetCols = [];
     for (let i = this.columns - reshuffleCols; i < this.columns; i++) {
         targetCols.push(i);
     }
 
-    // слоти
     const targetCells = this.grid.filter(c => targetCols.includes(c.col));
 
-    // карти
+    // Карты, которые можно перемешивать — только разблокированные
     const cardsToReshuffle = targetCells
-        .filter(c => c.card)
+        .filter(c => c.card && !c.card.getData('locked'))
         .map(c => c.card);
 
     if (cardsToReshuffle.length === 0) return;
 
-    // обнуляємо слоти
+    // Обнуляем только те слоты, где карты НЕ заблокированы (чтобы не трогать заблокированные)
     for (const cell of targetCells) {
-        if (cell.card) {
+        if (cell.card && !cell.card.getData('locked')) {
             cell.card = null;
+            cell.occupied = false;
         }
-        cell.occupied = false;
     }
 
-    // мішаємо карти і слоти під них
     Phaser.Utils.Array.Shuffle(cardsToReshuffle);
-    const emptyCells = targetCells.filter(c => !c.occupied);
-    Phaser.Utils.Array.Shuffle(emptyCells); 
 
-    // Виставляємо карти
+    // Пустые клетки — те, где нет карты или карта заблокирована (занятые клетки с locked === true считаем занятыми!)
+    // Поэтому берем только те клетки, которые не заняты (occupied === false)
+    const emptyCells = targetCells.filter(c => !c.occupied);
+    Phaser.Utils.Array.Shuffle(emptyCells);
+
+    // Размещаем перемешанные карты в пустые клетки
     for (let i = 0; i < cardsToReshuffle.length && i < emptyCells.length; i++) {
         const card = cardsToReshuffle[i];
         const cell = emptyCells[i];
@@ -49,7 +48,6 @@ export function RefreshLastCards() {
         cell.occupied = true;
     }
 
-    // Також оновлємо підсказки і обнулити lastMove для корректної роботи кнопки "UNDO"
     this.UpdateCellHints();
     this.lastMove = null;
 }
