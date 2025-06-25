@@ -10,6 +10,7 @@ import { UpdateCellHints } from './methods/UpdateCellHints';
 import { CreateCards } from './methods/CreateCards';
 import { CheckFinishedLines } from './methods/CheckFinishedLines';
 import { UtilsSpawnEffects } from './methods/UtilsSpawnEffects';
+import { UserValidMove } from './methods/UserValidMove';
 
 export class sceneGame extends Phaser.Scene {
     constructor() {
@@ -33,6 +34,7 @@ export class sceneGame extends Phaser.Scene {
         this.IsGameOver = IsGameOver.bind(this);
         this.CheckFinishedLines = CheckFinishedLines.bind(this);
 
+        this.UserValidMove = UserValidMove.bind(this);
 
         this.UtilsGetCardValue = UtilsGetCardValue.bind(this);
         this.UtilsGetNearestFreeCell = UtilsGetNearestFreeCell.bind(this);
@@ -60,10 +62,13 @@ export class sceneGame extends Phaser.Scene {
             frameHeight: this.cardHeight,
         });
 
-        this.load.audio('drag', './drag.wav');
-
         this.load.image('sparkGreen', './sparkGreen.webp');
         this.load.image('sparkRed', './sparkRed.webp');
+        this.load.image('cash', './cash.webp');
+        this.load.image('glow', './glow.webp');
+
+        this.load.audio('drag', './drag.wav');
+
     }
 
     create() {
@@ -73,9 +78,11 @@ export class sceneGame extends Phaser.Scene {
             .setOrigin(0, 0)
             .setDisplaySize(this.cameras.main.width, this.cameras.main.height);
 
+        // создаем сетку, карты, проверяем какие складены уже
         this.CreateGrid();
         this.CreateCards();
         this.CheckFinishedLines();
+
 
         this.input.on('dragstart', (pointer, gameObject) => {
             this.children.bringToTop(gameObject);
@@ -104,43 +111,7 @@ export class sceneGame extends Phaser.Scene {
                 const validMove = leftCard && leftValue + 1 === draggedValue;
 
                 if (validMove) {
-                    // Создаём эффект частиц в точке отпускания
-                    this.UtilsSpawnEffects(pointer, 'sparkGreen', 1.2);
-
-                    this.sound.play('drag');
-                    this.tweens.add({
-                        targets: card,
-                        scaleX: 1.1,
-                        scaleY: 1.1,
-                        yoyo: true,
-                        duration: 100,
-                        ease: 'Power2'
-                    });
-
-                    this.lastMove = {
-                        card: card,
-                        oldX: card.getData('originalX'),
-                        oldY: card.getData('originalY'),
-                        oldCell: card.getData('cell'),
-                        nearest: nearest,
-                    };
-
-                    oldCell.occupied = false;
-                    oldCell.card = null;
-
-                    card.x = nearest.x;
-                    card.y = nearest.y;
-                    card.setData('cell', nearest);
-                    card.setData('originalX', nearest.x);
-                    card.setData('originalY', nearest.y);
-
-                    nearest.occupied = true;
-                    nearest.card = card;
-
-                    engineStore.addMoves();
-                    engineStore.addScores();
-                    this.UpdateCellHints();
-                    this.CheckFinishedLines();
+                    this.UserValidMove(pointer, card, nearest, oldCell)
                 } else {
 
                     this.UtilsSpawnEffects(pointer, 'sparkRed', 0.2);

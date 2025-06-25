@@ -2,6 +2,7 @@ import { action, makeObservable, observable } from "mobx";
 import UIMenu from "../components/sceneMenu/UIMenu";
 import UIGame from "../components/sceneGame/UIGame";
 import UIGameOver from "../components/sceneGameOver/UIGameOver";
+import Phaser from 'phaser';
 
 class engineStore {
     // Коли міняємо сцену в грі, міняємо і UI інтерфейс для сцени також
@@ -9,30 +10,35 @@ class engineStore {
 
     constructor() {
         this.game/* : PhaserGame | null */ = null;
-        this.uiCurrent /* : sceneName */ = 'sceneMenu';
-        this.uiScenes = {
+        this.uiCurrent = 'sceneMenu'; // Стартовый UI 
+        this.uiScenes = { // к каждой сцене свой UI подключаем
             sceneMenu: <UIMenu />,
             sceneGame: <UIGame />,
             sceneGameOver: <UIGameOver />,
         };
-        this.difficultMode = 0; // 0 or 1
-        this.cards = 8;
-        this.random = 1;
+        this.difficultMode = 0; // удалить
+        this.cards = 6; // колво карт в ряду
+        this.random = 100; // шанс смешивания карт, чем меньше тем меньше карт перетасовано меж собой
 
         //user temp stats
-        this.userPlayTIme = 0;
-        this.userMoves = 0;
-        this.userScores = 0;
-        this.userShuffles = 2;
+        this.userPlayTIme = 0; // игровое время в раунде
+        this.userMoves = 0; // сколько ходов сделал за раунд
+        this.userScores = 0; // очки?
+        this.userCash = 1000; // баланс игрока
+        this.userShufflesPrice = 50; // цена за 1 перемешенивание карт
+        this.userMoneyDropSteps = 3; // 10 кликов(удачных) осталось до шанса получить монетки
 
 
         makeObservable(this, {
             uiCurrent: observable,
             userPlayTIme: observable,
             difficultMode: observable,
+            userCash: observable,
             setUI: action,
             update: action,
             setDifficult: action,
+            shuffleLastCards: action,
+            addCash: action,
         })
     }
     update() {
@@ -87,11 +93,11 @@ class engineStore {
     }
     shuffleLastCards() {
         // 3 колонки карт остані перемішуємо якщо в тупику юзер.
-        if (this.uiCurrent !== 'sceneGame' || this.userShuffles < 1) return;
+        if (this.uiCurrent !== 'sceneGame' || this.userCash < this.userShufflesPrice) return;
 
         let scene = this.game.scene.getScene('sceneGame');
         scene.RefreshLastCards()
-        this.userShuffles -= 1;
+        this.userCash -= this.userShufflesPrice;
     }
 
     //кількість карт (4-13) та наскільки перемішанна партія( 1-100 % )
@@ -108,7 +114,6 @@ class engineStore {
         this.userMoves = 0;
         this.userPlayTIme = 0;
         this.userScores = 0;
-        this.userShuffles = 2;
     }
 
     addMoves() {
@@ -117,6 +122,24 @@ class engineStore {
 
     addScores() {
         this.userScores += 100;
+    }
+    addCash(value) {
+        if (value <= 0) return;
+
+        this.userCash += value
+    }
+
+    isCanDropMoney() {
+        this.userMoneyDropSteps -= 1;
+
+        if (this.userMoneyDropSteps <= 0) {
+            this.userMoneyDropSteps = 3; // сбрасываем шаги
+
+            // даём шанс 50% получить монеты
+            return Phaser.Math.Between(0, 1) === 1;
+        }
+
+        return false;
     }
 }
 export default new engineStore()

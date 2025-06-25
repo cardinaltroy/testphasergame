@@ -1,6 +1,4 @@
-export function CheckFinishedLines() {
-    console.log('check');
-
+export function CheckFinishedLines() {  
     const maxValue = this.cardsValues; // Максимальное значение карты (например, 6 или 13)
 
     // Сначала снимаем блокировку и затемнение со всех карт

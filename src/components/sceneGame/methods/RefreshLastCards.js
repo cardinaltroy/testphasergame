@@ -10,7 +10,7 @@ export function RefreshLastCards() {
 
     const targetCells = this.grid.filter(c => targetCols.includes(c.col));
 
-    // Карты, которые можно перемешивать — только разблокированные
+    // Карты которые можно перемешивать = только разблокированные
     const cardsToReshuffle = targetCells
         .filter(c => c.card && !c.card.getData('locked'))
         .map(c => c.card);
@@ -27,7 +27,7 @@ export function RefreshLastCards() {
 
     Phaser.Utils.Array.Shuffle(cardsToReshuffle);
 
-    // Пустые клетки — те, где нет карты или карта заблокирована (занятые клетки с locked === true считаем занятыми!)
+    // Пустые клетки = те, где нет карты или карта заблокирована (занятые клетки с locked === true считаем занятыми!)
     // Поэтому берем только те клетки, которые не заняты (occupied === false)
     const emptyCells = targetCells.filter(c => !c.occupied);
     Phaser.Utils.Array.Shuffle(emptyCells);
@@ -50,4 +50,32 @@ export function RefreshLastCards() {
 
     this.UpdateCellHints();
     this.lastMove = null;
+
+    // --- ЭФФЕКТ СНЯТИЯ ДЕНЕГ ---
+    const centerX = this.cameras.main.centerX + 20;
+    const bottomY = this.cameras.main.height - 50;
+
+    const text = this.add.text(centerX, bottomY, '-50', {
+        font: '32px Arial',
+        fill: '#ff4d4d',
+        stroke: '#000',
+        strokeThickness: 4,
+    }).setOrigin(0.5).setDepth(100);
+
+    const icon = this.add.image(centerX - 50, bottomY, 'cash')
+        .setScale(0.5)
+        .setOrigin(0.5)
+        .setDepth(100);
+
+    this.tweens.add({
+        targets: [text, icon],
+        y: bottomY - 100,
+        alpha: 0,
+        duration: 1000,
+        ease: 'cubic.out',
+        onComplete: () => {
+            text.destroy();
+            icon.destroy();
+        }
+    });
 }
