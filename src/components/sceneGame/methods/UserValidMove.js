@@ -15,7 +15,7 @@ export function UserValidMove(pointer, card, nearest, oldCell) {
         const glow = this.add.image(0, 0, 'glow').setScale(5).setAlpha(0.7);
 
         // Объединяем в контейнер
-        const container = this.add.container(nearest.x, nearest.y, [glow, coin])
+        const container = this.add.container(nearest.x, nearest.y + 70, [glow, coin])
             .setDepth(20)
             .setSize(coin.width, coin.height)
             .setInteractive({ useHandCursor: true });
@@ -48,16 +48,21 @@ export function UserValidMove(pointer, card, nearest, oldCell) {
             container.destroy();
         });
 
-        // Клик по контейнеру
-        container.on('pointerdown', () => {
+
+
+        let alreadyFlying = false;
+
+        const flyCoinAway = () => {
+            if (alreadyFlying) return;
+            alreadyFlying = true;
 
             destroyTimer.remove();
             container.disableInteractive();
-            
+
             this.tweens.add({
                 targets: container,
                 y: -50,
-                x: this.scale.width * 0.75 - 50,
+                x: this.scale.width * 0.75 - 20,
                 scaleX: 0.3,
                 scaleY: 0.3,
                 alpha: 0.5,
@@ -68,7 +73,13 @@ export function UserValidMove(pointer, card, nearest, oldCell) {
                     engineStore.addCash(5);
                 }
             });
+        };
+        // Клик/ховер по контейнеру
+        container.on('pointerdown', flyCoinAway);
+        container.on('pointerover', (pointer) => {
+            flyCoinAway();
         });
+
     }
 
     // Создаём эффект частиц в точке отпускания
