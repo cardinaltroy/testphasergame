@@ -9,6 +9,7 @@ import { CreateDeck } from './methods/CreateDeck';
 import { CreateGrid } from './methods/CreateGrid';
 import { ArrangeCards } from './methods/ArrangeCards';
 import { UpdateCellHints } from './methods/UpdateCellHints';
+import { CreateCards } from './methods/CreateCards';
 
 export class sceneGame extends Phaser.Scene {
     constructor() {
@@ -25,6 +26,7 @@ export class sceneGame extends Phaser.Scene {
         //methods
         this.CreateGrid = CreateGrid.bind(this);
         this.CreateDeck = CreateDeck.bind(this);
+        this.CreateCards = CreateCards.bind(this);
         this.ArrangeCards = ArrangeCards.bind(this);
         this.UpdateCellHints = UpdateCellHints.bind(this);
 
@@ -38,17 +40,19 @@ export class sceneGame extends Phaser.Scene {
     }
 
     config() {
-        this.difficultMode = engineStore.difficultMode; // 0 = 6 cards, 1 = 13 cards
-        this.cardWidth = 41; // розміри однієї карти на спрайтлисті
+        this.cardWidth = 41;
         this.cardHeight = 59;
-        this.suits = 4; // масті
+        this.suits = 4;
 
-        this.cardsValues = this.difficultMode === 0 ? 6 : 13; // кількість карт в ряду 
-        this.cardsBase = this.difficultMode === 0 ? 3 : 6; // скільки з них фіксовані
-        this.cardsRandom = Math.max(this.cardsValues - this.cardsBase, 0); // інші рандомно розтавлені 
-        this.cardsFree = 1; // по 1 вільному слоту на ряд
-        this.columns = this.cardsBase + this.cardsRandom + this.cardsFree; // всього слотів під карти в ряду
+        this.cardsValues = engineStore.cards; // теперь напрямую из стора
+        this.cardsBase = 1; // всегда хотя бы одна карта в ряду
+        this.cardsRandom = Math.floor(this.cardsValues * (engineStore.random / 100));
+        this.cardsBase = this.cardsValues - this.cardsRandom;
+
+        this.cardsFree = 1;
+        this.columns = this.cardsBase + this.cardsRandom + this.cardsFree;
     }
+
 
     preload() {
         this.load.spritesheet('cards', './asset_card.webp', {
@@ -59,14 +63,15 @@ export class sceneGame extends Phaser.Scene {
     }
     create() {
         this.config()// якщо переключили складність то оновлюємо конфіг
-        
+
         this.add.image(0, 0, 'back') // задній фон
             .setOrigin(0, 0)
             .setDisplaySize(this.cameras.main.width, this.cameras.main.height);
 
         this.CreateGrid();
-        this.CreateDeck();
-        this.ArrangeCards();
+        this.CreateCards();
+        //this.CreateDeck();
+        //this.ArrangeCards();
 
         this.input.on('dragstart', (pointer, gameObject) => {
             this.children.bringToTop(gameObject); // карта завжди зверху

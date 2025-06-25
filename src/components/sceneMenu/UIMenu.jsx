@@ -3,19 +3,29 @@ import engineStore from '../../store/engineStore';
 import './UIMenu.scss';
 
 const UIMenu = observer(() => {
-    const play = () => {
+    const play = (cards, random) => {
+        engineStore.setDifficult(cards, random)
         engineStore.setScene('sceneGame')
         engineStore.userDrop()
     }
-    const setDiff = (e) => engineStore.setDifficult(Number(e.target.id))
-
     return (
         <div className="UI Menu">
-            <div className="menuTitle">PROTOTYPE GAME on REACT/PHASER/MobX/SCSS/MUI &copy; Cardinal Troy</div>
-            <div className="menuButton" onClick={play}>PLAY</div>
             <div className="menuDiff">
-                <div className={`btnSelect ${engineStore.difficultMode === 0 && 'on'}`} id={0} onClick={setDiff}>24 Cards</div>
-                <div className={`btnSelect ${engineStore.difficultMode === 1 && 'on'}`} id={1} onClick={setDiff}>52 Cards</div>
+                <div className='btnSelect' onClick={() => play(4, 1)}>1 Level <br/>(cards:4, random:1)</div>
+                <div className='btnSelect' onClick={() => play(4, 50)}>2 Level <br/>(cards:4, random:50)</div>
+                <div className='btnSelect' onClick={() => play(4, 100)}>3 Level <br/>(cards:4, random:100)</div>
+
+                <div className='btnSelect' onClick={() => play(6, 1)}>4 Level <br/>(cards:6, random:1)</div>
+                <div className='btnSelect' onClick={() => play(6, 50)}>5 Level <br/>(cards:6, random:1)</div>
+                <div className='btnSelect' onClick={() => play(6, 100)}>6 Level <br/>(cards:6, random:1)</div>
+
+                <div className='btnSelect' onClick={() => play(8, 1)}>7 Level <br/>(cards:8, random:1)</div>
+                <div className='btnSelect' onClick={() => play(8, 50)}>8 Level <br/>(cards:8, random:1)</div>
+                <div className='btnSelect' onClick={() => play(8, 100)}>9 Level <br/>(cards:8, random:1)</div>
+
+                <div className='btnSelect' onClick={() => play(13, 1)}>10 Level <br/>(cards:13, random:1)</div>
+                <div className='btnSelect' onClick={() => play(13, 50)}>11 Level <br/>(cards:13, random:1)</div>
+                <div className='btnSelect' onClick={() => play(13, 100)}>12 Level <br/>(cards:13, random:1)</div>
             </div>
         </div>
     );

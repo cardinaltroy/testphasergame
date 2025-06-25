@@ -16,6 +16,8 @@ class engineStore {
             sceneGameOver: <UIGameOver />,
         };
         this.difficultMode = 0; // 0 or 1
+        this.cards = 8;
+        this.random = 1;
 
         //user temp stats
         this.userPlayTIme = 0;
@@ -63,7 +65,7 @@ class engineStore {
     }
 
     setGame(game) {
-        if (!game) return; // Ще би описати тип для тайпскрипта для повної провірки :)
+        if (!game) return;
 
         this.game = game;
         return game;
@@ -91,8 +93,13 @@ class engineStore {
         scene.RefreshLastCards()
         this.userShuffles -= 1;
     }
-    setDifficult(id) {
-        if(id === 0 || 1) this.difficultMode = id;
+
+    //кількість карт (4-13) та наскільки перемішанна партія( 1-100 % )
+    setDifficult(cards, random) {
+        if (!cards || !random) return;
+
+        this.cards = cards;
+        this.random = random;
     }
 
     // USER

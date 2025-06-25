@@ -40,10 +40,12 @@
         padding: 1vh;
         border-radius: 10px;
         background: linear-gradient(45deg, #004200, #009b00);
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        aspect-ratio: 1/1;
+        height: 80vh;
         border: 2px solid rgb(55, 55, 55);
+        gap: 5px;
         box-shadow:
             0 12px 24px rgba(0, 0, 0, 0.3),
             0 -12px 24px rgba(0, 0, 0, 0.3),
@@ -51,12 +53,12 @@
             -12px 0 24px rgba(0, 0, 0, 0.3);
 
         .btnSelect {
-            padding: 10px;
             border-radius: 5px;
-        }
-
-        .on {
             background-color: #003000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
         }
     }
 }
