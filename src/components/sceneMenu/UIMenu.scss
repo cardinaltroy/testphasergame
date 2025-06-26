@@ -39,26 +39,44 @@
         text-shadow: #fc0 1px 0 10px;
         padding: 1vh;
         border-radius: 10px;
-        background: linear-gradient(45deg, #004200, #009b00);
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        aspect-ratio: 1/1;
-        height: 80vh;
-        border: 2px solid rgb(55, 55, 55);
-        gap: 5px;
-        box-shadow:
-            0 12px 24px rgba(0, 0, 0, 0.3),
-            0 -12px 24px rgba(0, 0, 0, 0.3),
-            12px 0 24px rgba(0, 0, 0, 0.3),
-            -12px 0 24px rgba(0, 0, 0, 0.3);
+        height: 75vh;
+        width: 105vh;
+        background-size: cover;
+        background-position: center center;
 
-        .btnSelect {
-            border-radius: 5px;
-            background-color: #003000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        .boxTitle {
+            width: 100%;
             text-align: center;
+            font-size: 5vh;
+            margin-top: 4vh;
+            margin-bottom: 10vh;
         }
+
+        .boxItems {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            width: 80%;
+            height: 40vh;
+            margin: 0 auto;
+            gap: 5px;
+
+
+            .btnSelect {
+                background-repeat: no-repeat;
+                background-size: cover;
+                background-position: center center;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+                height: 7vh;
+                transition: all 0.3s ease;
+                &:hover{
+                    transform: scale(1.1);
+                }
+            }
+        }
+
+
     }
 }

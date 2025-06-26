@@ -20,12 +20,40 @@ const UIGame = observer(() => {
     return (
         <div className="UI Game">
             <div className="gameNav">
+                <div className="gameLabel" ><img src="./cash.webp" alt="" />{engineStore.userCash}</div>
+                <div className="userBox">
+                    <div className="userImg">IMG</div>
+                    <div className="userData">
+                        <div className="userName">Platon</div>
+                        <div className="userCards">0/24</div>
+                    </div>
+                </div>
+                <div className="userBox">
+                    <div className="userImg">IMG</div>
+                    <div className="userData">
+                        <div className="userName">Platon</div>
+                        <div className="userCards">0/24</div>
+                    </div>
+                </div>
+                <div className="userBox">
+                    <div className="userImg">IMG</div>
+                    <div className="userData">
+                        <div className="userName">Platon</div>
+                        <div className="userCards">0/24</div>
+                    </div>
+                </div>
+                <div className="userBox">
+                    <div className="userImg">IMG</div>
+                    <div className="userData">
+                        <div className="userName">Platon</div>
+                        <div className="userCards">0/24</div>
+                    </div>
+                </div>
+            </div>
+            <div className="gameFooter">
                 <div className="gameLabel">SCORE: {engineStore.userScores}</div>
                 <div className="gameLabel">TIME: {format(engineStore.userPlayTIme)}</div>
                 <div className="gameLabel" >MOVES: {engineStore.userMoves}</div>
-                <div className="gameLabel" ><img src="./cash.webp" alt="" />{engineStore.userCash}</div>
-            </div>
-            <div className="gameFooter">
                 <div className="gameButton" onClick={menu}><ListIcon fontSize='large' /></div>
                 <div className="gameButton" onClick={reshaffle}><ShuffleIcon fontSize='large' /><img src="./cash.webp" alt="" />50</div>
                 <div className="gameButton" onClick={undo}><UndoIcon fontSize='large' /></div>

@@ -4,13 +4,29 @@
     .gameFooter {
         display: flex;
         width: 100vw;
-        justify-content: space-around;
+        justify-content: center;
         align-items: center;
+        gap: 2vw;
         background: linear-gradient(45deg, #004200, #009b00);
         border: 2px solid rgb(55, 55, 55);
         border-radius: 0 0 20px 20px;
         pointer-events: auto;
         font-size: 130%;
+        .userBox{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            .userImg{
+                height: 100%;
+                aspect-ratio: 1/1;
+                background-color: #004200;
+                border-radius: 5px;
+            }
+            .userData{
+                text-align: center;
+            }
+        }
 
         .gameButton {
             padding: 0.5vh;
