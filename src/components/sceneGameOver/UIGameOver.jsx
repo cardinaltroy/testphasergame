@@ -3,7 +3,7 @@ import './UIGameOver.scss';
 
 const UIGameOver = () => {
     const play = () => {
-        engineStore.setScene('sceneGame')
+        engineStore.setScene('sceneMenu')
         engineStore.userDrop()
     }
     return (

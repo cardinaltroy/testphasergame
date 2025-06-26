@@ -1,11 +1,9 @@
 import engineStore from "../../../store/engineStore";
 
 export function IsGameOver() {
-    // Відпрацьовує після кожного перетягуваня карти
     const rows = 4;
 
     for (let row = 0; row < rows; row++) {
-        // отримуємо ряд
         const rowCells = this.grid
             .filter(c => c.row === row)
             .sort((a, b) => a.col - b.col);
@@ -13,16 +11,17 @@ export function IsGameOver() {
         for (let i = 0; i < this.cardsValues; i++) {
             const cell = rowCells[i];
             const card = cell?.card;
-            if (!card) return; // є пусті слоти
+            if (!card) return; // слот пустой — рано завершать
 
-            const value = this.UtilsGetCardValue(card);
-            const suit = card.frame.name / 13 | 0;
+            const value = this.UtilsGetCardValue(card); // теперь напрямую
+            const suit = card.getData('suit'); // масть
 
             if (value !== i + 1 || suit !== row) {
-                return; // карта не та що повинна бути
+                return; // неправильная карта в ряду
             }
         }
     }
 
-    engineStore.setScene('sceneGameOver')
+    // Если все карты на местах:
+    engineStore.setScene('sceneGameOver');
 }

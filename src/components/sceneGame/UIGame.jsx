@@ -27,7 +27,7 @@ const UIGame = observer(() => {
             </div>
             <div className="gameFooter">
                 <div className="gameButton" onClick={menu}><ListIcon fontSize='large' /></div>
-                <div className="gameButton" onClick={reshaffle}><ShuffleIcon fontSize='large' />(50$)</div>
+                <div className="gameButton" onClick={reshaffle}><ShuffleIcon fontSize='large' /><img src="./cash.webp" alt="" />50</div>
                 <div className="gameButton" onClick={undo}><UndoIcon fontSize='large' /></div>
             </div>
         </div>

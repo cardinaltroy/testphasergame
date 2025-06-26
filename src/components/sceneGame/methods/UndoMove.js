@@ -1,39 +1,45 @@
 export function UndoMove() {
-    // метод простий для того щоб 1 крок назад відтворити. Для того щоб більше потрібно робити історію уже
     if (this.lastMove) {
-        // коли перетянули карту записується lastMove
         const {
-            card, // карта
-            oldX, // координати звідки ми перетягували 
+            card,    // контейнер карты
+            oldX,
             oldY,
-            oldCell, // і слот сітки з якого перетянули карту
-            nearest  // а а це слот в який ми закинули карту, щоб при ундо його обнулити і підказки працювали коорректно
+            oldCell,
+            nearest
         } = this.lastMove;
 
-        card.x = oldX; // повертаєм спрайт назад
+        // Возвращаем контейнер в исходную позицию
+        card.x = oldX;
         card.y = oldY;
 
         if (oldCell) {
-            oldCell.occupied = true; // указуєм що повернулись в колонку і тепер занята
+            oldCell.occupied = true;
             oldCell.card = card;
         }
 
-        if (nearest) { // а тут навпаки
+        if (nearest) {
             nearest.occupied = false;
             nearest.card = null;
         }
 
-        // в карті обновляємо актуальну інфу про неї
+        // Обновляем данные в контейнере
         card.setData('cell', oldCell);
         card.setData('originalX', oldX);
         card.setData('originalY', oldY);
-        card.clearTint();
+
+        // Убираем затемнение со всех спрайтов внутри контейнера
+        ['cardSprite', 'bgSprite', 'suitIcon'].forEach(key => {
+            const sprite = card.getData(key);
+            if (sprite) sprite.clearTint();
+        });
+
+        // Включаем взаимодействие и перетаскивание
         card.setInteractive();
+        this.input.setDraggable(card, true);
         card.setData('locked', false);
 
-        this.lastMove = null; // чистим "історію"
+        this.lastMove = null;
 
-        //обновити підсказки
         this.UpdateCellHints();
         this.CheckFinishedLines();
     }

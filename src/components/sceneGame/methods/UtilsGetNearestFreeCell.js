@@ -17,6 +17,5 @@ export function UtilsGetNearestFreeCell(x, y) {
             minDist = dist;
         }
     }
-
     return nearest;
 }

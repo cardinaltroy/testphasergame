@@ -13,7 +13,7 @@
         font-size: 130%;
 
         .gameButton {
-            padding: 2vh;
+            padding: 0.5vh;
             cursor: pointer;
             display: flex;
             justify-content: center;
@@ -26,13 +26,19 @@
             &:hover {
                 background-color: #005900;
             }
+
+            img {
+                width: 4vh;
+                aspect-ratio: 1/1;
+            }
         }
 
         .gameLabel {
             padding: 2vh;
             display: flex;
             align-items: center;
-            img{
+
+            img {
                 width: 4vh;
                 aspect-ratio: 1/1;
             }

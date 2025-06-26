@@ -1,65 +1,66 @@
-export function CheckFinishedLines() {  
+export function CheckFinishedLines() {
     const maxValue = this.cardsValues; // Максимальное значение карты (например, 6 или 13)
 
-    // Сначала снимаем блокировку и затемнение со всех карт
+    // Снимаем блокировку и затемнение со всех карт
     for (const cell of this.grid) {
-        const card = cell.card;
-        if (card && card.getData('locked')) {
-            card.clearTint();
-            card.setInteractive();
-            card.setData('locked', false);
+        const cardContainer = cell.card;
+        if (cardContainer && cardContainer.getData('locked')) {
+            ['cardSprite', 'bgSprite', 'suitIcon'].forEach(key => {
+                const sprite = cardContainer.getData(key);
+                if (sprite) sprite.clearTint();
+            });
+
+            cardContainer.setInteractive();
+            this.input.setDraggable(cardContainer, true); // Включаем перетаскивание обратно
+            cardContainer.setData('locked', false);
         }
     }
 
-    // Проходим по каждому ряду (масти)
+    // Проверяем каждый ряд (масть)
     for (let row = 0; row < this.suits; row++) {
-        // Получаем и сортируем ячейки этого ряда по колонкам
         const rowCells = this.grid
             .filter(c => c.row === row)
             .sort((a, b) => a.col - b.col);
 
-        let expectedValue = 1;      // Ожидаемая карта (начинаем с туза)
-        let baseSuit = null;        // Масть, которую должны соблюдать
-        let sequence = [];          // Последовательность подходящих карт
+        let expectedValue = 1;
+        let baseSuit = null;
+        let sequence = [];
 
-        // Проходим по всем ячейкам ряда слева направо
         for (const cell of rowCells) {
-            const card = cell.card;
+            if (!cell.occupied || !cell.card) break;
 
-            // Если ячейка пустая или карты нет — прерываем проверку ряда
-            if (!cell.occupied || !card) break;
+            const cardContainer = cell.card;
+            const cardSprite = cardContainer.getData('cardSprite');
+            if (!cardSprite) break;
 
-            const value = this.UtilsGetCardValue(card); // Значение карты
-            const suit = card.getData('suit');          // Масть карты
+            const value = this.UtilsGetCardValue(cardSprite);
+            const suit = cardContainer.getData('suit');
 
-            // Если значение не совпадает с ожидаемым — выход
             if (value !== expectedValue) break;
 
-            // Если это первая карта в ряду — запоминаем масть
             if (expectedValue === 1) {
                 baseSuit = suit;
-            }
-            // Если масть не совпадает с базовой — выход
-            else if (suit !== baseSuit) {
+            } else if (suit !== baseSuit) {
                 break;
             }
 
-            // Добавляем карту в последовательность
-            sequence.push(card);
+            sequence.push(cardContainer);
             expectedValue++;
 
-            // Если достигли максимального значения — прерываем (ряд может быть завершён)
             if (expectedValue > maxValue) break;
         }
 
-        // ✅ Если есть хотя бы одна подходящая карта (включая туза)
-        // то блокируем все карты в последовательности (чтобы нельзя было двигать)
         if (sequence.length > 0) {
-            for (const card of sequence) {
-                if (!card.getData('locked')) {
-                    card.setTint(0x888888);           // Затемняем карту
-                    card.disableInteractive();        // Запрещаем взаимодействие
-                    card.setData('locked', true);     // Помечаем как заблокированную
+            for (const cardContainer of sequence) {
+                if (!cardContainer.getData('locked')) {
+                    ['cardSprite', 'bgSprite', 'suitIcon'].forEach(key => {
+                        const sprite = cardContainer.getData(key);
+                        if (sprite) sprite.setTint(0x888888);
+                    });
+
+                    cardContainer.disableInteractive();
+                    this.input.setDraggable(cardContainer, false); // Отключаем перетаскивание
+                    cardContainer.setData('locked', true);
                 }
             }
         }

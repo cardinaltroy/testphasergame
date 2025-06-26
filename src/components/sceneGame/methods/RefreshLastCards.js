@@ -1,23 +1,16 @@
 import Phaser from 'phaser';
 
 export function RefreshLastCards() {
-    const reshuffleCols = this.difficultMode === 0 ? 3 : 5; // 3 или 5 колонок
+    const targetCells = this.grid;
 
-    const targetCols = [];
-    for (let i = this.columns - reshuffleCols; i < this.columns; i++) {
-        targetCols.push(i);
-    }
-
-    const targetCells = this.grid.filter(c => targetCols.includes(c.col));
-
-    // Карты которые можно перемешивать = только разблокированные
+    // Карты для перемешивания — только разблокированные
     const cardsToReshuffle = targetCells
-        .filter(c => c.card && !c.card.getData('locked'))
-        .map(c => c.card);
+        .filter(cell => cell.card && !cell.card.getData('locked'))
+        .map(cell => cell.card);
 
     if (cardsToReshuffle.length === 0) return;
 
-    // Обнуляем только те слоты, где карты НЕ заблокированы (чтобы не трогать заблокированные)
+    // Освобождаем слоты для перемешиваемых карт
     for (const cell of targetCells) {
         if (cell.card && !cell.card.getData('locked')) {
             cell.card = null;
@@ -27,12 +20,11 @@ export function RefreshLastCards() {
 
     Phaser.Utils.Array.Shuffle(cardsToReshuffle);
 
-    // Пустые клетки = те, где нет карты или карта заблокирована (занятые клетки с locked === true считаем занятыми!)
-    // Поэтому берем только те клетки, которые не заняты (occupied === false)
-    const emptyCells = targetCells.filter(c => !c.occupied);
+    // Пустые клетки (occupied === false)
+    const emptyCells = targetCells.filter(cell => !cell.occupied);
     Phaser.Utils.Array.Shuffle(emptyCells);
 
-    // Размещаем перемешанные карты в пустые клетки
+    // Расставляем перемешанные карты в пустые клетки
     for (let i = 0; i < cardsToReshuffle.length && i < emptyCells.length; i++) {
         const card = cardsToReshuffle[i];
         const cell = emptyCells[i];

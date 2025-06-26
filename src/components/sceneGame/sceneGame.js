@@ -57,10 +57,21 @@ export class sceneGame extends Phaser.Scene {
 
 
     preload() {
-        this.load.spritesheet('cards', './asset_card.webp', {
-            frameWidth: this.cardWidth,
-            frameHeight: this.cardHeight,
-        });
+        // надо бы сделать нормальный AssetLoader через список потом
+
+        //cards
+        for (let i = 0; i <= 12; i++) {
+            this.load.image(`card_${i}b`, `./card_${i}b.png`);
+            this.load.image(`card_${i}r`, `./card_${i}r.png`);
+        }
+        //cards bg
+        this.load.image('card_bg2', './card_bg2.png');
+        this.load.image('card_place', './card_place.png');
+
+        //suits
+        for (let i = 0; i <= 3; i++) {
+            this.load.image(`suit_${i}`, `./lear_mini_${i}.png`);
+        }
 
         this.load.image('sparkGreen', './sparkGreen.webp');
         this.load.image('sparkRed', './sparkRed.webp');
@@ -89,13 +100,15 @@ export class sceneGame extends Phaser.Scene {
         });
 
         this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
+            if (gameObject.getData('locked')) return; // 🔒 не даём таскать
+            console.log(gameObject.getData('locked'))
             gameObject.x = dragX;
             gameObject.y = dragY;
         });
 
+
         this.input.on('dragend', (pointer, card) => {
             const nearest = this.UtilsGetNearestFreeCell(card.x, card.y);
-
             if (nearest) {
                 const oldCell = card.getData('cell');
                 const draggedValue = this.UtilsGetCardValue(card);
@@ -110,6 +123,7 @@ export class sceneGame extends Phaser.Scene {
 
                 const validMove = leftCard && leftValue + 1 === draggedValue;
 
+                console.log(nearest, oldCell, leftCell, leftCard, leftValue);
                 if (validMove) {
                     this.UserValidMove(pointer, card, nearest, oldCell)
                 } else {
@@ -137,6 +151,8 @@ export class sceneGame extends Phaser.Scene {
 
             this.IsGameOver();
         });
+
+        console.log(this.cards)
     }
 
 

@@ -8,14 +8,14 @@ export function UserValidMove(pointer, card, nearest, oldCell) {
         const screenHeight = this.scale.height;
 
         const targetX = Phaser.Math.Between(0, 1) === 0 ? 60 : screenWidth - 60;
-        const targetY = screenHeight - 60;
+        const targetY = nearest.y + 50;
 
         // Создаём объекты
         const coin = this.add.image(0, 0, 'cash').setScale(0.6);
         const glow = this.add.image(0, 0, 'glow').setScale(5).setAlpha(0.7);
 
         // Объединяем в контейнер
-        const container = this.add.container(nearest.x, nearest.y + 70, [glow, coin])
+        const container = this.add.container(nearest.x, nearest.y + 100, [glow, coin])
             .setDepth(20)
             .setSize(coin.width, coin.height)
             .setInteractive({ useHandCursor: true });

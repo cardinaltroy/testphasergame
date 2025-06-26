@@ -11,8 +11,7 @@ export function UpdateCellHints() {
         const leftCard = leftCell?.card;
 
         if (leftCard) {
-            const frameIndex = leftCard.frame.name ?? leftCard.frame;
-            const value = (frameIndex % 13) + 1; // 1 = A, ..., 11 = J, 12 = Q, 13 = K
+            const value = leftCard.getData('value')
 
             const nextValue = value + 1;
 
