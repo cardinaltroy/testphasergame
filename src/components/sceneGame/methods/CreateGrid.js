@@ -1,7 +1,8 @@
+
 export function CreateGrid() {
     const cols = this.columns;
     const rows = 4;
-    const scale = 1.2;
+    const scale = this.UtilsGridScale()
     const spacingX = 75*scale;
     const spacingY = 105*scale;
 

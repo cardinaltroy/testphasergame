@@ -11,6 +11,9 @@ import { CreateCards } from './methods/CreateCards';
 import { CheckFinishedLines } from './methods/CheckFinishedLines';
 import { UtilsSpawnEffects } from './methods/UtilsSpawnEffects';
 import { UserValidMove } from './methods/UserValidMove';
+import { RenderCardsFlyInAnimation } from './methods/Render/RenderCardsFlyInAnimation';
+import { RenderCardsRevealAnimation } from './methods/Render/RenderCardsRevealAnimation';
+import { UtilsGridScale } from './methods/UtilsGridScale';
 
 export class sceneGame extends Phaser.Scene {
     constructor() {
@@ -26,6 +29,8 @@ export class sceneGame extends Phaser.Scene {
 
         //methods
         this.CreateGrid = CreateGrid.bind(this);
+        this.RenderCardsFlyInAnimation = RenderCardsFlyInAnimation.bind(this);
+        this.RenderCardsRevealAnimation = RenderCardsRevealAnimation.bind(this);
         this.CreateCards = CreateCards.bind(this);
         this.UpdateCellHints = UpdateCellHints.bind(this);
 
@@ -39,6 +44,7 @@ export class sceneGame extends Phaser.Scene {
         this.UtilsGetCardValue = UtilsGetCardValue.bind(this);
         this.UtilsGetNearestFreeCell = UtilsGetNearestFreeCell.bind(this);
         this.UtilsSpawnEffects = UtilsSpawnEffects.bind(this);
+        this.UtilsGridScale = UtilsGridScale.bind(this);
     }
 
     config() {
@@ -67,6 +73,8 @@ export class sceneGame extends Phaser.Scene {
         //cards bg
         this.load.image('card_bg2', './card_bg2.png');
         this.load.image('card_place', './card_place.png');
+        this.load.image('card_shirt3', './card_shirt3.png');
+
 
         //suits
         for (let i = 0; i <= 3; i++) {
@@ -89,19 +97,32 @@ export class sceneGame extends Phaser.Scene {
             .setOrigin(0, 0)
             .setDisplaySize(this.cameras.main.width, this.cameras.main.height);
 
-        // создаем сетку, карты, проверяем какие складены уже
-        this.CreateGrid();
-        this.CreateCards();
-        this.CheckFinishedLines();
+        this.CreateGrid(); // создаем сетку
+
+        this.CreateCards(); // подготовка карт, создали и перемешали
+        this.RenderCardsFlyInAnimation(); // анимаия прилета карт
+        this.RenderCardsRevealAnimation();// разворот карт
+
+        this.CheckFinishedLines(); // проверка карт которые заблокировать и затемнить
 
 
         this.input.on('dragstart', (pointer, gameObject) => {
             this.children.bringToTop(gameObject);
+            if (gameObject.getData('locked')) {
+                // Один раз трясем карту при попытке потянуть
+                this.tweens.add({
+                    targets: gameObject,
+                    x: gameObject.x - 5,
+                    duration: 50,
+                    yoyo: true,
+                    repeat: 2,
+                    ease: 'Sine.easeInOut',
+                });
+            }
         });
 
         this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
-            if (gameObject.getData('locked')) return; // 🔒 не даём таскать
-            console.log(gameObject.getData('locked'))
+            if (gameObject.getData('locked')) return; // не даём таскать
             gameObject.x = dragX;
             gameObject.y = dragY;
         });

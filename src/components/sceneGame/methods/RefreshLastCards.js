@@ -10,7 +10,7 @@ export function RefreshLastCards() {
 
     if (cardsToReshuffle.length === 0) return;
 
-    // Освобождаем слоты для перемешиваемых карт
+    // Освобождаем клетки
     for (const cell of targetCells) {
         if (cell.card && !cell.card.getData('locked')) {
             cell.card = null;
@@ -20,24 +20,29 @@ export function RefreshLastCards() {
 
     Phaser.Utils.Array.Shuffle(cardsToReshuffle);
 
-    // Пустые клетки (occupied === false)
     const emptyCells = targetCells.filter(cell => !cell.occupied);
     Phaser.Utils.Array.Shuffle(emptyCells);
 
-    // Расставляем перемешанные карты в пустые клетки
     for (let i = 0; i < cardsToReshuffle.length && i < emptyCells.length; i++) {
         const card = cardsToReshuffle[i];
         const cell = emptyCells[i];
 
-        card.x = cell.x;
-        card.y = cell.y;
-
+        // Обновим cell в карточке, но позицию изменим позже через tween
         card.setData('cell', cell);
         card.setData('originalX', cell.x);
         card.setData('originalY', cell.y);
 
         cell.card = card;
         cell.occupied = true;
+
+        // Плавное перемещение
+        this.tweens.add({
+            targets: card,
+            x: cell.x,
+            y: cell.y,
+            duration: 300,
+            ease: 'Cubic.easeOut'
+        });
     }
 
     this.UpdateCellHints();

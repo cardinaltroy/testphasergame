@@ -10,8 +10,9 @@ export function CreateCards() {
 
     this.cardsData = [];
     this.cards = [];
+    this.flyInSprites = [];
 
-    // 1. Генерируем карты
+    // Генерация всех карт
     for (let suit = 0; suit < suits; suit++) {
         for (let value = 1; value <= cardsPerRow; value++) {
             this.cardsData.push({ suit, value });
@@ -21,74 +22,62 @@ export function CreateCards() {
     const aces = this.cardsData.filter(c => c.value === 1);
     let others = this.cardsData.filter(c => c.value !== 1);
 
-    // 2. Размещаем все карты строго по местам
-    for (let suit = 0; suit < suits; suit++) {
-        // Туз в первую колонку
-        const ace = aces.find(c => c.suit === suit);
-        const aceCell = this.grid.find(c => c.row === suit && c.col === 0);
-        if (ace && aceCell) {
-            RenderCard(this, aceCell, ace.value, suit, this.cards);
-        }
-
-        // Остальные карты (2 и выше)
-        const rowOthers = others.filter(c => c.suit === suit);
-        for (let i = 0; i < rowOthers.length && i < totalCols - 2; i++) {
-            const cell = this.grid.find(c => c.row === suit && c.col === i + 1);
-            if (cell) {
-                RenderCard(this, cell, rowOthers[i].value, suit, this.cards);
-            }
-        }
-    }
-
-    // 3. Подготавливаем 1–4 случайные пустые ячейки в последнем столбце
+    // Пустые ячейки в последнем столбце
     const lastColCells = this.grid.filter(c => c.col === totalCols - 1);
     Phaser.Utils.Array.Shuffle(lastColCells);
     const emptyCellCount = Phaser.Math.Between(1, Math.min(4, lastColCells.length));
     const initialEmptyCells = lastColCells.slice(0, emptyCellCount);
+    initialEmptyCells.forEach(c => {
+        c.occupied = false;
+        c.card = null;
+    });
 
-    for (const cell of initialEmptyCells) {
-        cell.occupied = false;
-        cell.card = null;
+    // Подготовка cardsLayout
+    this.cardsLayout = [];
+
+    for (let suit = 0; suit < suits; suit++) {
+        // Туз
+        const ace = aces.find(c => c.suit === suit);
+        const aceCell = this.grid.find(c => c.row === suit && c.col === 0);
+        this.cardsLayout.push({ cell: aceCell, cardData: ace, x: aceCell.x, y: aceCell.y });
+
+        // Остальные карты
+        const rowOthers = others.filter(c => c.suit === suit);
+        for (let i = 0; i < rowOthers.length && i < totalCols - 2; i++) {
+            const cell = this.grid.find(c => c.row === suit && c.col === i + 1);
+            this.cardsLayout.push({ cell, cardData: rowOthers[i], x: cell.x, y: cell.y });
+        }
+
+        // Последняя ячейка
+        const endCell = this.grid.find(c => c.row === suit && c.col === totalCols - 1);
+        if (initialEmptyCells.includes(endCell)) {
+            this.cardsLayout.push({ cell: endCell, cardData: null, x: endCell.x, y: endCell.y });
+        } else {
+            const extraCard = others.find(c => c.suit === suit && !this.cardsLayout.some(l => l.cardData === c));
+            this.cardsLayout.push({ cell: endCell, cardData: extraCard || null, x: endCell.x, y: endCell.y });
+        }
     }
 
-    // 4. Вычисляем shuffleCount (кол-во перестановок)
-    const maxShuffleCount = others.length;
+    // Перемешивание
+    const movableSlots = this.cardsLayout.filter(slot => slot.cardData && slot.cardData.value !== 1);
+    const maxShuffleCount = movableSlots.length;
     let shuffleCount = Math.floor((randomPercent / 100) * maxShuffleCount);
     if (randomPercent > 0 && shuffleCount === 0) shuffleCount = 1;
 
-    // 5. Получаем текущие свободные ячейки
-    let posEmptyCells = [...initialEmptyCells];
+    let emptyCells = this.cardsLayout.filter(slot => !slot.cardData);
 
-    // 6. Выполняем перемешивание
-    while (shuffleCount > 0 && posEmptyCells.length > 0) {
-        // Выбираем карту, которую можно переместить (не туз, и сейчас стоит на месте)
-        const movableCards = this.cards.filter(sprite => {
-            const cell = sprite.getData('cell');
-            const value = sprite.getData('value');
-            return cell && cell.occupied && value !== 1;
-        });
+    while (shuffleCount > 0 && emptyCells.length > 0 && movableSlots.length > 0) {
+        const source = Phaser.Utils.Array.GetRandom(movableSlots);
+        const target = Phaser.Utils.Array.RemoveRandomElement(emptyCells);
 
-        if (movableCards.length === 0) break;
+        const temp = source.cardData;
+        source.cardData = null;
+        target.cardData = temp;
 
-        const chosenCard = Phaser.Utils.Array.GetRandom(movableCards);
-        const fromCell = chosenCard.getData('cell');
-        const toCell = Phaser.Utils.Array.RemoveRandomElement(posEmptyCells);
+        movableSlots.splice(movableSlots.indexOf(source), 1);
+        movableSlots.push(target);
+        emptyCells.push(source);
 
-        // Перемещаем карту
-        chosenCard.setPosition(toCell.x, toCell.y);
-        chosenCard.setData('cell', toCell);
-        chosenCard.setData('originalX', toCell.x);
-        chosenCard.setData('originalY', toCell.y);
-
-        toCell.card = chosenCard;
-        toCell.occupied = true;
-
-        fromCell.card = null;
-        fromCell.occupied = false;
-
-        posEmptyCells.push(fromCell); // теперь она стала пустой
         shuffleCount--;
     }
-
-    this.UpdateCellHints();
 }

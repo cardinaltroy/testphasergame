@@ -1,6 +1,11 @@
 export function CheckFinishedLines() {
     const maxValue = this.cardsValues; // Максимальное значение карты (например, 6 или 13)
 
+    // Инициализируем множество анимированных рядов, если ещё нет
+    if (!this.animatedRows) {
+        this.animatedRows = new Set();
+    }
+
     // Снимаем блокировку и затемнение со всех карт
     for (const cell of this.grid) {
         const cardContainer = cell.card;
@@ -58,10 +63,23 @@ export function CheckFinishedLines() {
                         if (sprite) sprite.setTint(0x888888);
                     });
 
-                    cardContainer.disableInteractive();
-                    this.input.setDraggable(cardContainer, false); // Отключаем перетаскивание
                     cardContainer.setData('locked', true);
+                    //cardContainer.disableInteractive();
+                    //this.input.setDraggable(cardContainer, false);
                 }
+            }
+
+            // Добавляем анимацию только если ряд полный и ещё не анимировался
+            if (sequence.length === maxValue && !this.animatedRows.has(row)) {
+                this.tweens.add({
+                    targets: sequence,
+                    scale: 1.1,
+                    yoyo: true,
+                    duration: 300,
+                    ease: 'Sine.easeInOut',
+                    repeat: 1,
+                });
+                this.animatedRows.add(row);
             }
         }
     }
