@@ -1,18 +1,21 @@
+import { EffectShuffleArrow } from './Render/EffectShuffleArrow';
+
 export function UpdateCellHints() {
-    // обновляємо підсказки куди і які карит можемо поставити
+    let flagStepsvailable = 0;
+
+    // обновляем подсказки, куда и какие карты можем поставить
     for (const cell of this.grid) {
-        if (cell.occupied) { // тут вже є карта
+        if (cell.occupied) { // здесь уже есть карта
             cell.hint.setText('');
             continue;
         }
 
-        //провіряємо ліву карту, і показуємо підсказку + 1 від лівої карти, якщо карта остання або зліва пусто то нічого
+        // проверяем левую карту и показываем подсказку + 1 от левой карты
         const leftCell = this.grid.find(c => c.row === cell.row && c.col === cell.col - 1);
         const leftCard = leftCell?.card;
 
         if (leftCard) {
-            const value = leftCard.getData('value')
-
+            const value = leftCard.getData('value');
             const nextValue = value + 1;
 
             if (nextValue <= this.cardsValues) {
@@ -32,11 +35,29 @@ export function UpdateCellHints() {
                         break;
                 }
                 cell.hint.setText(hintText);
+                flagStepsvailable++;
             } else {
                 cell.hint.setText('');
             }
         } else {
             cell.hint.setText('');
+        }
+    }
+
+    // Обновляем состояние доступных ходов
+    this.hintsAvailable = flagStepsvailable;
+
+    // Если доступных ходов нет, показываем мигающую стрелку
+
+    if (this.hintsAvailable === 0 && !this.lvlFinished) {
+        if (!this.arrow) {
+            EffectShuffleArrow(this)
+        }
+    } else {
+        // Если есть доступные ходы, убираем стрелку
+        if (this.arrow) {
+            this.arrow.destroy();
+            this.arrow = null; // Убираем ссылку на стрелку
         }
     }
 }

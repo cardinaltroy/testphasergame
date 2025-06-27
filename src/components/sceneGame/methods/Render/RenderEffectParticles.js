@@ -1,6 +1,6 @@
-export function UtilsSpawnEffects(pointer, name, size){
+export function RenderEffectParticles(scene, pointer, name, size){
     // Создаём эффект частиц в точке отпускания
-    const particles = this.add.particles(pointer.x, pointer.y, name, {
+    const particles = scene.add.particles(pointer.x, pointer.y, name, {
         color: [0xfacc22, 0xf89800, 0xf83600, 0x9f0404],
         colorEase: 'quad.out',
         lifespan: 500,

@@ -9,13 +9,15 @@ import { CreateGrid } from './methods/CreateGrid';
 import { UpdateCellHints } from './methods/UpdateCellHints';
 import { CreateCards } from './methods/CreateCards';
 import { CheckFinishedLines } from './methods/CheckFinishedLines';
-import { UtilsSpawnEffects } from './methods/UtilsSpawnEffects';
 import { UserValidMove } from './methods/UserValidMove';
 import { RenderCardsFlyInAnimation } from './methods/Render/RenderCardsFlyInAnimation';
 import { RenderCardsRevealAnimation } from './methods/Render/RenderCardsRevealAnimation';
 import { UtilsGridScale } from './methods/UtilsGridScale';
+import { RenderEffectParticles } from './methods/Render/RenderEffectParticles';
+import { EffectMissClick } from './methods/Render/EffectMissClick';
 
 export class sceneGame extends Phaser.Scene {
+    //ПО НЕМНОГУ РЕФАКТОРИМ ПРОЕКТ
     constructor() {
         super('sceneGame');
         //temp
@@ -23,6 +25,8 @@ export class sceneGame extends Phaser.Scene {
         this.grid = []; // сітка зі слотами для карт
         this.lastMove = null; // для undo
         this.elapsed = 0; // для таймеру
+        this.hintsAvailable = 0; // кол-во доступных ходов в текущий момент. Для эффектов 
+        this.lvlFinished = false; // стейт для эффекта стрелки возле кнопки перемешивания, что игра закончена
 
         //config
         this.config();
@@ -43,7 +47,6 @@ export class sceneGame extends Phaser.Scene {
 
         this.UtilsGetCardValue = UtilsGetCardValue.bind(this);
         this.UtilsGetNearestFreeCell = UtilsGetNearestFreeCell.bind(this);
-        this.UtilsSpawnEffects = UtilsSpawnEffects.bind(this);
         this.UtilsGridScale = UtilsGridScale.bind(this);
     }
 
@@ -60,7 +63,11 @@ export class sceneGame extends Phaser.Scene {
         this.cardsFree = 1;
         this.columns = this.cardsBase + this.cardsRandom + this.cardsFree;
     }
-
+    check(){
+        this.IsGameOver();
+        this.UpdateCellHints();
+        this.CheckFinishedLines();
+    }
 
     preload() {
         // надо бы сделать нормальный AssetLoader через список потом
@@ -81,10 +88,13 @@ export class sceneGame extends Phaser.Scene {
             this.load.image(`suit_${i}`, `./lear_mini_${i}.png`);
         }
 
+        //others
         this.load.image('sparkGreen', './sparkGreen.webp');
         this.load.image('sparkRed', './sparkRed.webp');
+        this.load.image('icon_x', './icon_x.png');
         this.load.image('cash', './cash.webp');
         this.load.image('glow', './glow.webp');
+        this.load.image('arrow', './tutorial_arrow2.png');
 
         this.load.audio('drag', './drag.wav');
 
@@ -103,7 +113,7 @@ export class sceneGame extends Phaser.Scene {
         this.RenderCardsFlyInAnimation(); // анимаия прилета карт
         this.RenderCardsRevealAnimation();// разворот карт
 
-        this.CheckFinishedLines(); // проверка карт которые заблокировать и затемнить
+        this.CheckFinishedLines(true); // проверка карт которые заблокировать и затемнить. true - что бы сбросить всё при новом уровне
 
 
         this.input.on('dragstart', (pointer, gameObject) => {
@@ -144,12 +154,12 @@ export class sceneGame extends Phaser.Scene {
 
                 const validMove = leftCard && leftValue + 1 === draggedValue;
 
-                console.log(nearest, oldCell, leftCell, leftCard, leftValue);
+                //console.log(nearest, oldCell, leftCell, leftCard, leftValue);
                 if (validMove) {
                     this.UserValidMove(pointer, card, nearest, oldCell)
                 } else {
 
-                    this.UtilsSpawnEffects(pointer, 'sparkRed', 0.2);
+                    RenderEffectParticles(this, pointer, 'sparkRed', 0.2);
 
                     this.tweens.add({
                         targets: card,
@@ -160,7 +170,7 @@ export class sceneGame extends Phaser.Scene {
                     });
                 }
             } else {
-                this.UtilsSpawnEffects(pointer, 'sparkRed', 0.2);
+                RenderEffectParticles(this, pointer, 'sparkRed', 0.2);
                 this.tweens.add({
                     targets: card,
                     x: card.getData('originalX'),
@@ -173,7 +183,18 @@ export class sceneGame extends Phaser.Scene {
             this.IsGameOver();
         });
 
-        console.log(this.cards)
+        // Добавляем обработку кликов на пустое место
+        this.input.on('pointerdown', (pointer) => {
+            const x = pointer.x;
+            const y = pointer.y;
+
+            // Проверяем, кликнули ли по пустому месту (не по карте)
+            const isCardClicked = this.grid.some(cell => cell.card && cell.card.getBounds().contains(x, y));
+
+            if (!isCardClicked) {
+                EffectMissClick(this, pointer)
+            }
+        });
     }
 
 

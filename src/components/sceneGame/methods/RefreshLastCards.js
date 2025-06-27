@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { RenderEffectMinusCash } from './Render/RenderEffectMinusCash';
 
 export function RefreshLastCards() {
     const targetCells = this.grid;
@@ -17,17 +18,44 @@ export function RefreshLastCards() {
             cell.occupied = false;
         }
     }
-
-    Phaser.Utils.Array.Shuffle(cardsToReshuffle);
-
+    
     const emptyCells = targetCells.filter(cell => !cell.occupied);
+
+    // Функция проверки, перемещалась ли хотя бы одна карта
+    const isNotSamePlace = () => {
+        let flag = false;
+
+        for (let i = 0; i < cardsToReshuffle.length && i < emptyCells.length; i++) {
+            const card = cardsToReshuffle[i];
+            const oldCell = card.getData('cell');
+            const cell = emptyCells[i];
+
+            // если координаты карты и клетки не совпадают, значит хотя бы 1 карта переместилась
+            if (oldCell.col !== cell.col || oldCell.row !== cell.row) flag = true; 
+        }
+        return flag;
+    };
+
+    // Перемешиваем карты и пустые клетки независимо
+    Phaser.Utils.Array.Shuffle(cardsToReshuffle);
     Phaser.Utils.Array.Shuffle(emptyCells);
 
+    // Перемешиваем несколько раз, если карты не переместились
+    let shuffleAttempts = 0;
+    const maxAttempts = 3; // Максимальное количество попыток перетасовать карты
+
+    while (!isNotSamePlace() && shuffleAttempts < maxAttempts) {
+        Phaser.Utils.Array.Shuffle(cardsToReshuffle);
+        Phaser.Utils.Array.Shuffle(emptyCells);
+        shuffleAttempts++;
+    }
+
+    // После того как карты перемешаны, обновляем их позицию
     for (let i = 0; i < cardsToReshuffle.length && i < emptyCells.length; i++) {
         const card = cardsToReshuffle[i];
         const cell = emptyCells[i];
 
-        // Обновим cell в карточке, но позицию изменим позже через tween
+        // Обновляем cell в карточке
         card.setData('cell', cell);
         card.setData('originalX', cell.x);
         card.setData('originalY', cell.y);
@@ -45,34 +73,9 @@ export function RefreshLastCards() {
         });
     }
 
-    this.UpdateCellHints();
+    this.check();
     this.lastMove = null;
 
     // --- ЭФФЕКТ СНЯТИЯ ДЕНЕГ ---
-    const centerX = this.cameras.main.centerX + 20;
-    const bottomY = this.cameras.main.height - 50;
-
-    const text = this.add.text(centerX, bottomY, '-50', {
-        font: '32px Arial',
-        fill: '#ff4d4d',
-        stroke: '#000',
-        strokeThickness: 4,
-    }).setOrigin(0.5).setDepth(100);
-
-    const icon = this.add.image(centerX - 50, bottomY, 'cash')
-        .setScale(0.5)
-        .setOrigin(0.5)
-        .setDepth(100);
-
-    this.tweens.add({
-        targets: [text, icon],
-        y: bottomY - 100,
-        alpha: 0,
-        duration: 1000,
-        ease: 'cubic.out',
-        onComplete: () => {
-            text.destroy();
-            icon.destroy();
-        }
-    });
+    RenderEffectMinusCash(this);
 }

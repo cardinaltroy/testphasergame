@@ -40,7 +40,6 @@ export function UndoMove() {
 
         this.lastMove = null;
 
-        this.UpdateCellHints();
-        this.CheckFinishedLines();
+        this.check()
     }
 }

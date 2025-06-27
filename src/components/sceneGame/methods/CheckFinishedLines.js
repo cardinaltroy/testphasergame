@@ -1,8 +1,8 @@
-export function CheckFinishedLines() {
+export function CheckFinishedLines(drop) {
     const maxValue = this.cardsValues; // Максимальное значение карты (например, 6 или 13)
 
     // Инициализируем множество анимированных рядов, если ещё нет
-    if (!this.animatedRows) {
+    if (!this.animatedRows || drop) {
         this.animatedRows = new Set();
     }
 

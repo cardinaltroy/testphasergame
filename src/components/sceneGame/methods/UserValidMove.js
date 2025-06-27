@@ -1,5 +1,6 @@
 import engineStore from "../../../store/engineStore";
 import Phaser from 'phaser';
+import { RenderEffectParticles } from "./Render/RenderEffectParticles";
 
 export function UserValidMove(pointer, card, nearest, oldCell) {
     //Проверяем бесплатные монетки
@@ -83,7 +84,7 @@ export function UserValidMove(pointer, card, nearest, oldCell) {
     }
 
     // Создаём эффект частиц в точке отпускания
-    this.UtilsSpawnEffects(pointer, 'sparkGreen', 1.2);
+    RenderEffectParticles(this, pointer, 'sparkGreen', 1.2);
 
     this.sound.play('drag');
     this.tweens.add({
@@ -117,6 +118,6 @@ export function UserValidMove(pointer, card, nearest, oldCell) {
 
     engineStore.addMoves();
     engineStore.addScores();
-    this.UpdateCellHints();
-    this.CheckFinishedLines();
+    
+    this.check()
 }

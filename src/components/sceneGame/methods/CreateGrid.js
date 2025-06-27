@@ -35,7 +35,7 @@ export function CreateGrid() {
                 occupied: false,
                 card: null,
                 hint: this.add.text(x, y, '', {
-                    fontSize: '18px',
+                    fontSize: '45px',
                     color: '#ffffff',
                     fontFamily: 'monospace'
                 }).setOrigin(0.5),

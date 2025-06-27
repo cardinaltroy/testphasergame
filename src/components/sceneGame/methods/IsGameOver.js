@@ -29,11 +29,14 @@ export function IsGameOver() {
     }
 
     if (sequence.length === 0) return;
+    // вынести в рендер
 
     const centerX = this.cameras.main.centerX;
     const centerY = this.cameras.main.height + 200;
 
-    sequence.forEach((card, i) => {
+    this.lvlFinished = true;
+    
+    sequence.reverse().forEach((card, i) => {
         const sprite = card.getData('cardSprite');
         if (!sprite) return;
 
@@ -53,6 +56,8 @@ export function IsGameOver() {
                 if (i === sequence.length - 1) {
                     this.time.delayedCall(300, () => {
                         engineStore.setScene('sceneGameOver');
+                        this.lvlFinished = false;
+
                     });
                 }
             }
