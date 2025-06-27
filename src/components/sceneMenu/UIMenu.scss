@@ -71,12 +71,38 @@
                 text-align: center;
                 height: 7vh;
                 transition: all 0.3s ease;
-                &:hover{
+
+                &:hover {
                     transform: scale(1.1);
                 }
             }
         }
 
+        .boxUsers {
+            width: 80%;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+
+            .userBox {
+                width: 20%;
+                aspect-ratio: 1/1;
+                text-align: center;
+                color: black;
+
+                .userFrame {
+                    background-size: 100% 100%;
+                    background-repeat: no-repeat;
+                    background-position: center center;
+                    padding: 10px;
+                }
+
+                img {
+                    width: 100%;
+                    height: 100%;
+                }
+            }
+        }
 
     }
 }

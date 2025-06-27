@@ -7,24 +7,50 @@
         justify-content: center;
         align-items: center;
         gap: 2vw;
-        background: linear-gradient(45deg, #004200, #009b00);
-        border: 2px solid rgb(55, 55, 55);
-        border-radius: 0 0 20px 20px;
         pointer-events: auto;
         font-size: 130%;
-        .userBox{
+
+        .userBox {
+            margin-top: 2px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 5px;
-            .userImg{
-                height: 100%;
+            background-size: 100% 100%;
+            height: 10vh;
+            width: 30vh;
+            padding: 5px 10px 5px 10px;
+
+            .userImg {
+                height: 7vh;
                 aspect-ratio: 1/1;
                 background-color: #004200;
-                border-radius: 5px;
+                border-radius: 10px;
+                border: 5px solid gold;
+                overflow: hidden;
+                border-radius: 15px;
+
+                img {
+                    height: 100%;
+                    width: 100%;
+                }
             }
-            .userData{
+
+            .userData {
                 text-align: center;
+                .userName{
+                    font-size: 4vh;
+                }
+
+                .userCards {
+                    height: 4vh;
+                    display: flex;
+
+                    img {
+                        height: 100%;
+                        aspect-ratio: 1/1;
+                    }
+                }
             }
         }
 
@@ -63,6 +89,12 @@
 
     .gameFooter {
         border-radius: 20px 20px 0 0;
+        border: none;
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        width: 50vw;
+        padding: 2px;
     }
 
     pointer-events: none;

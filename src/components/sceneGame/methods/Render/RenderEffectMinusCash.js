@@ -1,8 +1,8 @@
-export function RenderEffectMinusCash(scene) {
+export function RenderEffectMinusCash(scene, cash = 0) {
     const centerX = scene.cameras.main.centerX + 20;
     const bottomY = scene.cameras.main.height - 50;
 
-    const text = scene.add.text(centerX, bottomY, '-50', {
+    const text = scene.add.text(centerX, bottomY, `-${cash}`, {
         font: '32px Arial',
         fill: '#ff4d4d',
         stroke: '#000',

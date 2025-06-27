@@ -1,4 +1,4 @@
-import { action, makeObservable, observable } from "mobx";
+import { action, makeAutoObservable, makeObservable, observable } from "mobx";
 import UIMenu from "../components/sceneMenu/UIMenu";
 import UIGame from "../components/sceneGame/UIGame";
 import UIGameOver from "../components/sceneGameOver/UIGameOver";
@@ -26,8 +26,9 @@ class engineStore {
         this.userScores = 0; // очки?
         this.userCash = 1000; // баланс игрока
         this.userShufflesPrice = 50; // цена за 1 перемешенивание карт
+        this.userHintPrice = 25; // цена за 1 перемешенивание карт
         this.userMoneyDropSteps = 3; // 10 кликов(удачных) осталось до шанса получить монетки
-
+        this.userAFKTimeout = 10; //через сколько секунд показать подсказку если не ходит юзер
 
         makeObservable(this, {
             uiCurrent: observable,
@@ -39,6 +40,7 @@ class engineStore {
             setDifficult: action,
             shuffleLastCards: action,
             addCash: action,
+            showUserHint: action,
         })
     }
     update() {
@@ -92,12 +94,18 @@ class engineStore {
         scene.UndoMove();
     }
     shuffleLastCards() {
-        // 3 колонки карт остані перемішуємо якщо в тупику юзер.
+        // перемешиваем карты кроме заблокированых
         if (this.uiCurrent !== 'sceneGame' || this.userCash < this.userShufflesPrice) return;
 
         let scene = this.game.scene.getScene('sceneGame');
         scene.RefreshLastCards()
         this.userCash -= this.userShufflesPrice;
+    }
+    showUserHint() {
+        if (this.uiCurrent !== 'sceneGame') return;
+        let scene = this.game.scene.getScene('sceneGame');
+        scene.GetUserHint(false);
+        this.userCash -= this.userHintPrice;
     }
 
     //кількість карт (4-13) та наскільки перемішанна партія( 1-100 % )

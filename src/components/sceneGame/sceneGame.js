@@ -15,6 +15,7 @@ import { RenderCardsRevealAnimation } from './methods/Render/RenderCardsRevealAn
 import { UtilsGridScale } from './methods/UtilsGridScale';
 import { RenderEffectParticles } from './methods/Render/RenderEffectParticles';
 import { EffectMissClick } from './methods/Render/EffectMissClick';
+import { GetUserHint } from './methods/GetUserHint';
 
 export class sceneGame extends Phaser.Scene {
     //ПО НЕМНОГУ РЕФАКТОРИМ ПРОЕКТ
@@ -27,6 +28,7 @@ export class sceneGame extends Phaser.Scene {
         this.elapsed = 0; // для таймеру
         this.hintsAvailable = 0; // кол-во доступных ходов в текущий момент. Для эффектов 
         this.lvlFinished = false; // стейт для эффекта стрелки возле кнопки перемешивания, что игра закончена
+        this.afkTimer = 0;
 
         //config
         this.config();
@@ -44,6 +46,7 @@ export class sceneGame extends Phaser.Scene {
         this.CheckFinishedLines = CheckFinishedLines.bind(this);
 
         this.UserValidMove = UserValidMove.bind(this);
+        this.GetUserHint = GetUserHint.bind(this);
 
         this.UtilsGetCardValue = UtilsGetCardValue.bind(this);
         this.UtilsGetNearestFreeCell = UtilsGetNearestFreeCell.bind(this);
@@ -54,6 +57,7 @@ export class sceneGame extends Phaser.Scene {
         this.cardWidth = 41;
         this.cardHeight = 59;
         this.suits = 4;
+        this.afkTimer = 0;
 
         this.cardsValues = engineStore.cards; // теперь напрямую из стора
         this.cardsBase = 1; // всегда хотя бы одна карта в ряду
@@ -63,7 +67,7 @@ export class sceneGame extends Phaser.Scene {
         this.cardsFree = 1;
         this.columns = this.cardsBase + this.cardsRandom + this.cardsFree;
     }
-    check(){
+    check() {
         this.IsGameOver();
         this.UpdateCellHints();
         this.CheckFinishedLines();
@@ -132,6 +136,7 @@ export class sceneGame extends Phaser.Scene {
         });
 
         this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
+            this.dropAFK();
             if (gameObject.getData('locked')) return; // не даём таскать
             gameObject.x = dragX;
             gameObject.y = dragY;
@@ -185,6 +190,7 @@ export class sceneGame extends Phaser.Scene {
 
         // Добавляем обработку кликов на пустое место
         this.input.on('pointerdown', (pointer) => {
+            this.dropAFK()
             const x = pointer.x;
             const y = pointer.y;
 
@@ -197,15 +203,27 @@ export class sceneGame extends Phaser.Scene {
         });
     }
 
+    dropAFK() {
+        this.afkTimer = 0;
+    }
 
     update(time, delta) {
         this.elapsed += delta
 
-        // Раз в секунду апдейтим стейти наприклад таймер гри
+        // Раз в секунду
         if (this.elapsed >= 1000) {
             this.elapsed -= 1000
 
-            engineStore.update()
+            engineStore.update() // надо подумать а только только при сцене работает, надо ли:?
+
+            // например 10 сек юзер не ходил, показываем подсказку, и ждем пока дропнется счетчик для нового афк отсчета 
+            if (this.afkTimer < engineStore.userAFKTimeout) {
+                this.afkTimer++;
+            } else if (this.afkTimer === engineStore.userAFKTimeout) {
+                this.GetUserHint()
+                this.afkTimer++;
+            }
+
         }
     }
 }

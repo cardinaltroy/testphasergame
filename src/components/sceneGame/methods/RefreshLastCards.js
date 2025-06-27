@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { RenderEffectMinusCash } from './Render/RenderEffectMinusCash';
+import engineStore from '../../../store/engineStore';
 
 export function RefreshLastCards() {
     const targetCells = this.grid;
@@ -77,5 +78,5 @@ export function RefreshLastCards() {
     this.lastMove = null;
 
     // --- ЭФФЕКТ СНЯТИЯ ДЕНЕГ ---
-    RenderEffectMinusCash(this);
+    RenderEffectMinusCash(this, engineStore.userShufflesPrice);
 }
