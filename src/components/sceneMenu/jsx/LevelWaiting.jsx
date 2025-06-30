@@ -5,22 +5,16 @@ import { observer } from "mobx-react-lite";
 
 import CircularProgress from '@mui/material/CircularProgress';
 
-const LevelWaiting = observer((props) => {
+const LevelWaiting = observer(() => {
     const [displayedBots, setDisplayedBots] = useState([]);
-    const { level } = props;
 
     const play = () => {
-        engineStore.setDifficult(level.cards, level.random);
         engineStore.setScene('sceneGame');
         engineStore.userDrop();
     };
 
     useEffect(() => {
-        // Сначала очищаем старых ботов, если они были
-        botsStore.clearAll();
-        // Спавним 4 бота
-        botsStore.spawn(4);
-
+        botsStore.setPause(false)
         // Массив ботов для отображения
         const bots = botsStore.getCurrentBots;
 
@@ -37,13 +31,12 @@ const LevelWaiting = observer((props) => {
         }, bots.length * 1000 + 1000); // Ждем пока все боты появятся и еще 1 секунду
     }, []);
 
+
     return (
         <>
             <div className="boxTitle">WAITING OTHERS</div>
             <div className="boxUsers" >
-                {displayedBots.length === 0 ? (
-                    <CircularProgress />
-                ) : (
+                {
                     displayedBots.map((bot, key) => (
                         <div className="userBox" key={key}>
                             <div className="userFrame" style={{ backgroundImage: "url('/bots/bot_panel.png')" }}>
@@ -54,8 +47,21 @@ const LevelWaiting = observer((props) => {
                             <div className="userName">{bot.name}</div>
                         </div>
                     ))
-                )}
+                }
+                {
+                    botsStore.losers.map((bot, key) => (
+                        <div className="userBox userLoser" key={key}>
+                            <div className="userFrame" style={{ backgroundImage: "url('/bots/bot_panel.png')" }}>
+                                <div className="userImg">
+                                    <img src={`./bots/${bot.img}`} alt={bot.name} />
+                                </div>
+                            </div>
+                            <div className="userName">{bot.name}</div>
+                        </div>
+                    ))
+                }
             </div>
+            <div className="boxRound"><CircularProgress />ROUND: {botsStore.currentRound}</div>
         </>
     );
 });

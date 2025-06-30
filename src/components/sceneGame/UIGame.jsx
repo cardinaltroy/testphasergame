@@ -9,7 +9,10 @@ import botsStore from '../../store/botsStore';
 import TipsAndUpdatesIcon from '@mui/icons-material/TipsAndUpdates';
 
 const UIGame = observer(() => {
-    const menu = () => engineStore.setScene('sceneMenu');
+    const menu = () => {
+        engineStore.setScene('sceneMenu');
+        botsStore.clearAll()
+    }
     const undo = () => engineStore.undoMove();
     const reshaffle = () => engineStore.shuffleLastCards();
     const hint = () => engineStore.showUserHint();
@@ -24,7 +27,7 @@ const UIGame = observer(() => {
                         <div className="userImg"><img src={`./bots/${bot.img}`} /></div>
                         <div className="userData">
                             <div className="userName">{bot.name}</div>
-                            <div className="userCards"><img src="./bots/cards.png" alt="" /> 0/24</div>
+                            <div className="userCards"><img src="./bots/cards.png" alt="" /> {bot.cardsFinished}/{engineStore.cards * 4}</div>
                         </div>
                     </div>
                 )}

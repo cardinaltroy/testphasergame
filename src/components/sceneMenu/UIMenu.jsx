@@ -1,21 +1,18 @@
 import { observer } from 'mobx-react-lite';
 import './UIMenu.scss';
 import LevelSelect from './jsx/LevelSelect';
-import { useState } from 'react';
 import LevelWaiting from './jsx/LevelWaiting';
+import botsStore from '../../store/botsStore';
 
 const UIMenu = observer(() => {
-    const [isWaiting, setWaiting] = useState(false); // false or { C, R }
-
+    const isWaiting = botsStore.currentRound != 0;
+    if(!isWaiting) return;
     return (
         <div className="UI Menu">
             <div className="menuDiff" style={{
                 backgroundImage: "url('/win_bg_info.png')",
             }}>
-                {isWaiting
-                    ? <LevelWaiting level={isWaiting} />
-                    : <LevelSelect setWaiting={setWaiting} />
-                }
+                <LevelWaiting />
             </div>
         </div>
     );

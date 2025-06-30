@@ -7,7 +7,6 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    backdrop-filter: blur(5px);
     color: white;
     user-select: none;
 
@@ -89,19 +88,40 @@
                 aspect-ratio: 1/1;
                 text-align: center;
                 color: black;
+                font-weight: bold;
 
                 .userFrame {
                     background-size: 100% 100%;
                     background-repeat: no-repeat;
                     background-position: center center;
                     padding: 10px;
-                }
 
-                img {
-                    width: 100%;
-                    height: 100%;
+                    img {
+                        width: 100%;
+                        height: 100%;
+                    }
                 }
             }
+
+            .userLoser {
+                img {
+                    filter: brightness(0.3);
+                }
+
+                color: red;
+                text-shadow: rgb(255, 77, 0) 1px 0 10px;
+            }
+        }
+
+        .boxRound {
+            width: 80%;
+            margin: 10vh auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: black;
+            font-weight: bold;
+            font-size: 2rem;
         }
 
     }

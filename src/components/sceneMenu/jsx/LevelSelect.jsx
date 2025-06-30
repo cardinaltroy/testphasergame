@@ -1,10 +1,11 @@
+import botsStore from "../../../store/botsStore";
 import engineStore from "../../../store/engineStore";
 
-const LevelSelect = (props) => {
-    const { setWaiting } = props;
+const LevelSelect = () => {
 
     const play = (cards, random) => { // Cards(4-13), Random (1-100)
-        setWaiting({ cards, random })
+        engineStore.setDifficult(cards, random)
+        botsStore.initNextRound();
     }
     return (
         <>

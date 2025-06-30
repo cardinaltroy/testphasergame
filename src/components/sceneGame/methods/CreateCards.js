@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
 import engineStore from '../../../store/engineStore';
-import { RenderCard } from './Render/RenderCard';
 
 export function CreateCards() {
     const cardsPerRow = engineStore.cards;

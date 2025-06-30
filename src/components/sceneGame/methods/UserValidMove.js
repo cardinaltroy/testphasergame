@@ -1,6 +1,6 @@
 import engineStore from "../../../store/engineStore";
 import Phaser from 'phaser';
-import { RenderEffectParticles } from "./Render/RenderEffectParticles";
+import { EffectCardsParticles } from "../render/EffectCardsParticles";
 
 export function UserValidMove(pointer, card, nearest, oldCell) {
     //Проверяем бесплатные монетки
@@ -12,7 +12,7 @@ export function UserValidMove(pointer, card, nearest, oldCell) {
         const targetY = nearest.y + 50;
 
         // Создаём объекты
-        const coin = this.add.image(0, 0, 'cash').setScale(0.6);
+        const coin = this.add.image(0, 0, 'cash').setScale(1.6);
         const glow = this.add.image(0, 0, 'glow').setScale(5).setAlpha(0.7);
 
         // Объединяем в контейнер
@@ -62,8 +62,8 @@ export function UserValidMove(pointer, card, nearest, oldCell) {
 
             this.tweens.add({
                 targets: container,
-                y: -50,
-                x: this.scale.width * 0.75 - 20,
+                y: this.scale.height,
+                x: this.scale.width/2 - 200,
                 scaleX: 0.3,
                 scaleY: 0.3,
                 alpha: 0.5,
@@ -84,7 +84,7 @@ export function UserValidMove(pointer, card, nearest, oldCell) {
     }
 
     // Создаём эффект частиц в точке отпускания
-    RenderEffectParticles(this, pointer, 'sparkGreen', 1.2);
+    EffectCardsParticles(this, pointer, 'sparkGreen', 1.2);
 
     this.sound.play('drag');
     this.tweens.add({
@@ -118,6 +118,6 @@ export function UserValidMove(pointer, card, nearest, oldCell) {
 
     engineStore.addMoves();
     engineStore.addScores();
-    
+
     this.check()
 }

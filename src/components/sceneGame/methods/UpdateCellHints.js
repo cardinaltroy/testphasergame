@@ -1,4 +1,4 @@
-import { EffectShuffleArrow } from './Render/EffectShuffleArrow';
+import { EffectShuffleArrow } from '../render/EffectShuffleArrow';
 
 export function UpdateCellHints() {
     let flagStepsvailable = 0;
@@ -50,14 +50,14 @@ export function UpdateCellHints() {
     // Если доступных ходов нет, показываем мигающую стрелку
 
     if (this.hintsAvailable === 0 && !this.lvlFinished) {
-        if (!this.arrow) {
+        if (!this.arrowHint) {
             EffectShuffleArrow(this)
         }
     } else {
         // Если есть доступные ходы, убираем стрелку
-        if (this.arrow) {
-            this.arrow.destroy();
-            this.arrow = null; // Убираем ссылку на стрелку
+        if (this.arrowHint) {
+            this.arrowHint.destroy();
+            this.arrowHint = null; // Убираем ссылку на стрелку
         }
     }
 }

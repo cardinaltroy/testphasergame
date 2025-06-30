@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
-import { RenderEffectMinusCash } from './Render/RenderEffectMinusCash';
 import engineStore from '../../../store/engineStore';
+import { EffectMinusCash } from '../render/EffectMinusCash';
 
 export function GetUserHint(AFK = true) {
     const availableMoves = []; // Список доступных ходов
@@ -32,20 +32,23 @@ export function GetUserHint(AFK = true) {
         }
     }
 
-    // Если нет доступных ходов, ничего не делаем
-    if (availableMoves.length === 0) {
-        return; 
-    }
 
-    if (!AFK) RenderEffectMinusCash(this, engineStore.userHintPrice); // за афк срабатывание не запускаем анимацию снятие денег
+    // eсли нет доступных ходов, ничего не делаем
+    if (availableMoves.length === 0) {
+        return;
+    }
 
     // Удаляем старую стрелку, если она есть
-    if (this.arrow) {
-        this.arrow.destroy();
-        this.arrow = null;
+    if (this.arrowHint) {
+        this.arrowHint.destroy();
+        this.arrowHint = null;
     }
 
-    // Печатаем список доступных ходов для отладки
+    if (!AFK) EffectMinusCash(this, engineStore.userHintPrice); // за афк срабатывание не запускаем анимацию снятие денег
+
+
+
+    //список доступных ходов для отладки
     // console.log('Доступные ходы:', availableMoves);
 
     // Функция для проверки, может ли карта быть поставлена на своё финальное место
@@ -80,7 +83,7 @@ export function GetUserHint(AFK = true) {
         const cardPosition = targetCard.card;
 
         // Спавним стрелку над картой, которая подходит
-        this.arrow = this.add.image(cardPosition.x + (cardPosition.width / 2) * this.UtilsGridScale(), cardPosition.y - 10, 'arrow')
+        this.arrowHint = this.add.image(cardPosition.x + (cardPosition.width / 2) * this.UtilsGridScale(), cardPosition.y - 10, 'arrow')
             .setOrigin(0.5)
             .setAlpha(1)
             .setRotation(Phaser.Math.DegToRad(-45))
@@ -88,9 +91,13 @@ export function GetUserHint(AFK = true) {
             .setDepth(1000)
             .setScale(0.5);
 
+        //  cохраняем ячейку, куда нужно положить карту
+        this.arrowHint.targetCell = cell;
+        this.arrowHint.targetCard = targetCard;
+
         // Добавляем анимацию мигания стрелки
         this.tweens.add({
-            targets: this.arrow,
+            targets: this.arrowHint,
             alpha: 0.3,
             duration: 500,
             yoyo: true,

@@ -87,6 +87,12 @@ class engineStore {
         this.setUI(sceneName);
     }
     //GAME
+    finishGame(winner) {
+        if (this.uiCurrent !== 'sceneGame' || !winner) return;
+
+        let scene = this.game.scene.getScene('sceneGame');
+        scene.finish(winner);
+    }
     undoMove() {
         if (this.uiCurrent !== 'sceneGame') return;
 

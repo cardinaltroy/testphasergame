@@ -10,12 +10,16 @@ import { UpdateCellHints } from './methods/UpdateCellHints';
 import { CreateCards } from './methods/CreateCards';
 import { CheckFinishedLines } from './methods/CheckFinishedLines';
 import { UserValidMove } from './methods/UserValidMove';
-import { RenderCardsFlyInAnimation } from './methods/Render/RenderCardsFlyInAnimation';
-import { RenderCardsRevealAnimation } from './methods/Render/RenderCardsRevealAnimation';
+import { RenderCardsFlyInAnimation } from './render/RenderCardsFlyInAnimation';
+import { RenderCardsRevealAnimation } from './render/RenderCardsRevealAnimation';
 import { UtilsGridScale } from './methods/UtilsGridScale';
-import { RenderEffectParticles } from './methods/Render/RenderEffectParticles';
-import { EffectMissClick } from './methods/Render/EffectMissClick';
+import { EffectCardsParticles } from './render/EffectCardsParticles';
+import { EffectMissClick } from './render/EffectMissClick';
 import { GetUserHint } from './methods/GetUserHint';
+import botsStore from '../../store/botsStore';
+import { RenderCardsGameOver } from './render/RenderCardsGameOver';
+import { RenderWinnerScreen } from './render/RenderWinnerScreen';
+import { GetUserHintSecond } from './methods/GetUserHintSecond';
 
 export class sceneGame extends Phaser.Scene {
     //ПО НЕМНОГУ РЕФАКТОРИМ ПРОЕКТ
@@ -35,8 +39,6 @@ export class sceneGame extends Phaser.Scene {
 
         //methods
         this.CreateGrid = CreateGrid.bind(this);
-        this.RenderCardsFlyInAnimation = RenderCardsFlyInAnimation.bind(this);
-        this.RenderCardsRevealAnimation = RenderCardsRevealAnimation.bind(this);
         this.CreateCards = CreateCards.bind(this);
         this.UpdateCellHints = UpdateCellHints.bind(this);
 
@@ -47,10 +49,18 @@ export class sceneGame extends Phaser.Scene {
 
         this.UserValidMove = UserValidMove.bind(this);
         this.GetUserHint = GetUserHint.bind(this);
+        this.GetUserHintSecond = GetUserHintSecond.bind(this);
 
         this.UtilsGetCardValue = UtilsGetCardValue.bind(this);
         this.UtilsGetNearestFreeCell = UtilsGetNearestFreeCell.bind(this);
         this.UtilsGridScale = UtilsGridScale.bind(this);
+
+        //renders
+        this.RenderCardsFlyInAnimation = RenderCardsFlyInAnimation.bind(this);
+        this.RenderCardsRevealAnimation = RenderCardsRevealAnimation.bind(this);
+        this.RenderCardsGameOver = RenderCardsGameOver.bind(this);
+        this.RenderWinnerScreen = RenderWinnerScreen.bind(this)
+
     }
 
     config() {
@@ -59,22 +69,41 @@ export class sceneGame extends Phaser.Scene {
         this.suits = 4;
         this.afkTimer = 0;
 
-        this.cardsValues = engineStore.cards; // теперь напрямую из стора
+        this.cardsValues = engineStore.cards; // колво карт в ряду напрямую из стора
         this.cardsBase = 1; // всегда хотя бы одна карта в ряду
         this.cardsRandom = Math.floor(this.cardsValues * (engineStore.random / 100));
         this.cardsBase = this.cardsValues - this.cardsRandom;
 
         this.cardsFree = 1;
         this.columns = this.cardsBase + this.cardsRandom + this.cardsFree;
+
+        this.isLevelStarted = false; //
+        this.LevelStartedTimer = 0;
+        this.LevelStartedTimeMax = engineStore.cards * 4 * 200 / 1000; // приблизительное время расскладки карт на доску.
     }
     check() {
         this.IsGameOver();
         this.UpdateCellHints();
         this.CheckFinishedLines();
     }
+    finish(winner) {
+        if (this.lvlFinished) return;
+        if (!winner) return;
+
+        this.RenderCardsGameOver();
+        this.RenderWinnerScreen(winner);
+        botsStore.initNextRound(winner);
+
+
+        console.log('finish')
+
+        this.time.delayedCall(3000, () => {
+            engineStore.setScene('sceneMenu')
+        })
+    }
 
     preload() {
-        // надо бы сделать нормальный AssetLoader через список потом
+        // надо бы сделать нормальный AssetLoader 
 
         //cards
         for (let i = 0; i <= 12; i++) {
@@ -132,6 +161,10 @@ export class sceneGame extends Phaser.Scene {
                     repeat: 2,
                     ease: 'Sine.easeInOut',
                 });
+            } else {
+
+                // Проверяем, совпадает ли карта, которую взяли, с той, на которую указывает стрелка
+                if (this.arrowHint && gameObject === this.arrowHint.targetCard.card) this.GetUserHintSecond();
             }
         });
 
@@ -144,6 +177,11 @@ export class sceneGame extends Phaser.Scene {
 
 
         this.input.on('dragend', (pointer, card) => {
+            if (this.arrowHint) {
+                this.arrowHint.destroy()
+                this.arrowHint = null
+            }
+
             const nearest = this.UtilsGetNearestFreeCell(card.x, card.y);
             if (nearest) {
                 const oldCell = card.getData('cell');
@@ -164,7 +202,7 @@ export class sceneGame extends Phaser.Scene {
                     this.UserValidMove(pointer, card, nearest, oldCell)
                 } else {
 
-                    RenderEffectParticles(this, pointer, 'sparkRed', 0.2);
+                    EffectCardsParticles(this, pointer, 'sparkRed', 0.2);
 
                     this.tweens.add({
                         targets: card,
@@ -175,7 +213,7 @@ export class sceneGame extends Phaser.Scene {
                     });
                 }
             } else {
-                RenderEffectParticles(this, pointer, 'sparkRed', 0.2);
+                EffectCardsParticles(this, pointer, 'sparkRed', 0.2);
                 this.tweens.add({
                     targets: card,
                     x: card.getData('originalX'),
@@ -214,7 +252,17 @@ export class sceneGame extends Phaser.Scene {
         if (this.elapsed >= 1000) {
             this.elapsed -= 1000
 
-            engineStore.update() // надо подумать а только только при сцене работает, надо ли:?
+            //Просто апдейтим
+            engineStore.update();
+            this.isLevelStarted && botsStore.update(); // адпейтим после того как карты разложились
+
+            //ждем начало уровня(что бы карты все разложились)
+            if (!this.isLevelStarted) {
+                this.LevelStartedTimer++;
+                if (this.LevelStartedTimer >= this.LevelStartedTimeMax) this.isLevelStarted = true;
+            }
+
+
 
             // например 10 сек юзер не ходил, показываем подсказку, и ждем пока дропнется счетчик для нового афк отсчета 
             if (this.afkTimer < engineStore.userAFKTimeout) {

@@ -1,4 +1,4 @@
-export function RenderEffectMinusCash(scene, cash = 0) {
+export function EffectMinusCash(scene, cash = 0) {
     const centerX = scene.cameras.main.centerX + 20;
     const bottomY = scene.cameras.main.height - 50;
 
