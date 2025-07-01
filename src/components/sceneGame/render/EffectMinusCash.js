@@ -1,4 +1,8 @@
+import engineStore from "../../../store/engineStore";
+
 export function EffectMinusCash(scene, cash = 0) {
+    scene.updateUI()
+
     const centerX = scene.cameras.main.centerX + 20;
     const bottomY = scene.cameras.main.height - 50;
 

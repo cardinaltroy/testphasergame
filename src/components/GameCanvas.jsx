@@ -14,7 +14,7 @@ const GameCanvas = observer(() => {
             type: Phaser.AUTO,
             width: window.innerWidth,
             height: window.innerHeight,
-            backgroundColor: '#007c0a',
+            backgroundColor: 'black',
             scene: [sceneMenu, sceneGame, sceneGameOver],
             scale: {
                 mode: Phaser.Scale.RESIZE,

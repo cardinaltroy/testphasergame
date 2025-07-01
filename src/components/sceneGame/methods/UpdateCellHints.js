@@ -1,4 +1,3 @@
-import { EffectShuffleArrow } from '../render/EffectShuffleArrow';
 
 export function UpdateCellHints() {
     let flagStepsvailable = 0;
@@ -51,7 +50,7 @@ export function UpdateCellHints() {
 
     if (this.hintsAvailable === 0 && !this.lvlFinished) {
         if (!this.arrowHint) {
-            EffectShuffleArrow(this)
+            this.EffectShuffleArrow()
         }
     } else {
         // Если есть доступные ходы, убираем стрелку

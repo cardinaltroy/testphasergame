@@ -3,8 +3,8 @@ import Phaser from 'phaser';
 export function GetUserHintSecond() {
     if (this.arrowHint && this.arrowHint.targetCell) {
         const cellSprite = this.arrowHint.targetCell.placeSprite;
-        const targetX = cellSprite.x;
-        const targetY = cellSprite.y - cellSprite.displayHeight / 2 - 10;
+        const targetX = cellSprite.x + cellSprite.displayWidth / 4;
+        const targetY = cellSprite.y;
 
         // Если уже идет tween по стрелке — отменим, чтобы не конфликтовать
         if (this.arrowHint.moveTween) {

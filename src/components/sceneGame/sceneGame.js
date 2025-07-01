@@ -20,6 +20,10 @@ import botsStore from '../../store/botsStore';
 import { RenderCardsGameOver } from './render/RenderCardsGameOver';
 import { RenderWinnerScreen } from './render/RenderWinnerScreen';
 import { GetUserHintSecond } from './methods/GetUserHintSecond';
+import { UIGameFooter } from './uirender/UIGameFooter';
+import { EffectShuffleArrow } from './render/EffectShuffleArrow';
+import { EffectFreeCash } from './render/EffectFreeCash';
+import { UIGameBots } from './uirender/UIGameBots';
 
 export class sceneGame extends Phaser.Scene {
     //ПО НЕМНОГУ РЕФАКТОРИМ ПРОЕКТ
@@ -60,7 +64,13 @@ export class sceneGame extends Phaser.Scene {
         this.RenderCardsRevealAnimation = RenderCardsRevealAnimation.bind(this);
         this.RenderCardsGameOver = RenderCardsGameOver.bind(this);
         this.RenderWinnerScreen = RenderWinnerScreen.bind(this)
+        this.EffectShuffleArrow = EffectShuffleArrow.bind(this)
+        this.EffectFreeCash = EffectFreeCash.bind(this);
+        this.EffectCardsParticles = EffectCardsParticles.bind(this);
 
+        //UI
+        this.UIGameFooter = UIGameFooter.bind(this);
+        this.UIGameBots = UIGameBots.bind(this);
     }
 
     config() {
@@ -91,46 +101,28 @@ export class sceneGame extends Phaser.Scene {
         if (!winner) return;
 
         this.RenderCardsGameOver();
-        this.RenderWinnerScreen(winner);
         botsStore.initNextRound(winner);
+        this.RenderWinnerScreen(winner, botsStore.currentRound);
 
 
-        console.log('finish')
+        if (winner.isBot) {
+            //console.log('турнир закончился победой бота', winner.name)
+            return this.time.delayedCall(6000, () => {
+                engineStore.setScene('sceneMenu')
+            });
+        } else if (botsStore.currentRound === 0) {
+            //console.log('на турнире победил игрок', winner.name)
+
+            return this.time.delayedCall(6000, () => {
+                engineStore.setScene('sceneMenu')
+            });
+        } else {
+            //console.log('следующий раунд')
+        }
 
         this.time.delayedCall(3000, () => {
             engineStore.setScene('sceneMenu')
-        })
-    }
-
-    preload() {
-        // надо бы сделать нормальный AssetLoader 
-
-        //cards
-        for (let i = 0; i <= 12; i++) {
-            this.load.image(`card_${i}b`, `./card_${i}b.png`);
-            this.load.image(`card_${i}r`, `./card_${i}r.png`);
-        }
-        //cards bg
-        this.load.image('card_bg2', './card_bg2.png');
-        this.load.image('card_place', './card_place.png');
-        this.load.image('card_shirt3', './card_shirt3.png');
-
-
-        //suits
-        for (let i = 0; i <= 3; i++) {
-            this.load.image(`suit_${i}`, `./lear_mini_${i}.png`);
-        }
-
-        //others
-        this.load.image('sparkGreen', './sparkGreen.webp');
-        this.load.image('sparkRed', './sparkRed.webp');
-        this.load.image('icon_x', './icon_x.png');
-        this.load.image('cash', './cash.webp');
-        this.load.image('glow', './glow.webp');
-        this.load.image('arrow', './tutorial_arrow2.png');
-
-        this.load.audio('drag', './drag.wav');
-
+        });
     }
 
     create() {
@@ -145,9 +137,10 @@ export class sceneGame extends Phaser.Scene {
         this.CreateCards(); // подготовка карт, создали и перемешали
         this.RenderCardsFlyInAnimation(); // анимаия прилета карт
         this.RenderCardsRevealAnimation();// разворот карт
-
         this.CheckFinishedLines(true); // проверка карт которые заблокировать и затемнить. true - что бы сбросить всё при новом уровне
 
+        this.UIGameFooter();
+        this.UIGameBots();
 
         this.input.on('dragstart', (pointer, gameObject) => {
             this.children.bringToTop(gameObject);
@@ -202,7 +195,7 @@ export class sceneGame extends Phaser.Scene {
                     this.UserValidMove(pointer, card, nearest, oldCell)
                 } else {
 
-                    EffectCardsParticles(this, pointer, 'sparkRed', 0.2);
+                    this.EffectCardsParticles(pointer, 'sparkRed', 0.2);
 
                     this.tweens.add({
                         targets: card,
@@ -213,7 +206,7 @@ export class sceneGame extends Phaser.Scene {
                     });
                 }
             } else {
-                EffectCardsParticles(this, pointer, 'sparkRed', 0.2);
+                this.EffectCardsParticles(pointer, 'sparkRed', 0.2);
                 this.tweens.add({
                     targets: card,
                     x: card.getData('originalX'),
@@ -244,8 +237,12 @@ export class sceneGame extends Phaser.Scene {
     dropAFK() {
         this.afkTimer = 0;
     }
+    updateUI() {
+        this.uiGameFooterMoney.setText(engineStore.userCash);
+    }
 
     update(time, delta) {
+
         this.elapsed += delta
 
         // Раз в секунду

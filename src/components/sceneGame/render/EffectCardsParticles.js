@@ -1,6 +1,6 @@
-export function EffectCardsParticles(scene, pointer, name, size){
+export function EffectCardsParticles(pointer, name, size){
     // Создаём эффект частиц в точке отпускания
-    const particles = scene.add.particles(pointer.x, pointer.y, name, {
+    const particles = this.add.particles(pointer.x, pointer.y, name, {
         color: [0xfacc22, 0xf89800, 0xf83600, 0x9f0404],
         colorEase: 'quad.out',
         lifespan: 500,
@@ -12,7 +12,7 @@ export function EffectCardsParticles(scene, pointer, name, size){
         duration: 100,
     });
 
-    particles.setDepth(10);  // поверх всего спавним 
+    particles.setDepth(502);  // поверх всего спавним 
 
     // удаляем всё когда эффект закончится
     particles.once('complete', () => {

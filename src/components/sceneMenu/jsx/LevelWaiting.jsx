@@ -41,7 +41,7 @@ const LevelWaiting = observer(() => {
                         <div className="userBox" key={key}>
                             <div className="userFrame" style={{ backgroundImage: "url('/bots/bot_panel.png')" }}>
                                 <div className="userImg">
-                                    <img src={`./bots/${bot.img}`} alt={bot.name} />
+                                    <img src={`./bots/${bot.img}.jpg`} alt={bot.name} />
                                 </div>
                             </div>
                             <div className="userName">{bot.name}</div>
@@ -53,7 +53,7 @@ const LevelWaiting = observer(() => {
                         <div className="userBox userLoser" key={key}>
                             <div className="userFrame" style={{ backgroundImage: "url('/bots/bot_panel.png')" }}>
                                 <div className="userImg">
-                                    <img src={`./bots/${bot.img}`} alt={bot.name} />
+                                    <img src={`./bots/${bot.img}.jpg`} alt={bot.name} />
                                 </div>
                             </div>
                             <div className="userName">{bot.name}</div>

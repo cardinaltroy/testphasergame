@@ -10,6 +10,7 @@ class botsStore {
         this.currentRound = 0;
         this.botsPlaySpeed = 5;
         this.botsPlaySpeedTolerance = 1;
+        this.botsSpawnMax = 4;
         makeAutoObservable(this)
     }
     initNextRound(winner = false) {
@@ -20,7 +21,7 @@ class botsStore {
 
         // Если ботов вообще нет — первый раунд
         if (!this.bots.length && this.currentRound === 0) {
-            this.spawn(3, true);
+            this.spawn(this.botsSpawnMax, true);
             this.currentRound++;
             //console.log('Спавним ботов. Раунд', this.currentRound);
             return;
@@ -74,6 +75,8 @@ class botsStore {
             if (bot.timeoutStep <= 0) {
                 bot.cardsFinished += 1;
                 bot.timeoutStep = bot.timeoutStepUpdate();
+                //console.log(bot.name, 'делает ход')
+                bot.textCars.setText(`${bot.cardsFinished}/${engineStore.cards * 4}`)
             } else {
                 bot.timeoutStep -= 1;
             }

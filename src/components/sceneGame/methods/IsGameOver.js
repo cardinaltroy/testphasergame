@@ -29,5 +29,5 @@ export function IsGameOver() {
     if (sequence.length === 0) return;
     
     //рендерим анимацию сбора карт
-    this.finish({name: 'USERNAME'})
+    this.finish({name: 'USERNAME', isBot: false})
 }

@@ -34,12 +34,10 @@ class engineStore {
             uiCurrent: observable,
             userPlayTIme: observable,
             difficultMode: observable,
-            userCash: observable,
             setUI: action,
             update: action,
             setDifficult: action,
             shuffleLastCards: action,
-            addCash: action,
             showUserHint: action,
         })
     }
@@ -104,14 +102,14 @@ class engineStore {
         if (this.uiCurrent !== 'sceneGame' || this.userCash < this.userShufflesPrice) return;
 
         let scene = this.game.scene.getScene('sceneGame');
-        scene.RefreshLastCards()
         this.userCash -= this.userShufflesPrice;
+        scene.RefreshLastCards()
     }
     showUserHint() {
         if (this.uiCurrent !== 'sceneGame') return;
         let scene = this.game.scene.getScene('sceneGame');
-        scene.GetUserHint(false);
         this.userCash -= this.userHintPrice;
+        scene.GetUserHint(false);
     }
 
     //кількість карт (4-13) та наскільки перемішанна партія( 1-100 % )
