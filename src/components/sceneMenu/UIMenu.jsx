@@ -1,6 +1,5 @@
 import { observer } from 'mobx-react-lite';
 import './UIMenu.scss';
-import LevelSelect from './jsx/LevelSelect';
 import LevelWaiting from './jsx/LevelWaiting';
 import botsStore from '../../store/botsStore';
 

@@ -1,11 +1,10 @@
 import Phaser from 'phaser';
 import engineStore from '../../../store/engineStore';
-import { EffectMinusCash } from '../render/EffectMinusCash';
 
 export function GetUserHint(AFK = true) {
     const availableMoves = []; // Список доступных ходов
 
-    // Находим все доступные ходы, как в UpdateCellHints, но добавляем в availableMoves
+    // находим все доступные ходы, как в UpdateCellHints, но добавляем в availableMoves
     for (const cell of this.grid) {
         if (cell.occupied) continue;
 
@@ -17,7 +16,7 @@ export function GetUserHint(AFK = true) {
             const nextValue = value + 1;
 
             if (nextValue <= this.cardsValues) {
-                // Находим подходящую карту для этой клетки
+                // находим подходящую карту для этой клетки
                 let hintText;
                 switch (nextValue) {
                     case 11: hintText = 'J'; break;
@@ -44,7 +43,12 @@ export function GetUserHint(AFK = true) {
         this.arrowHint = null;
     }
 
-    if (!AFK) EffectMinusCash(this, engineStore.userHintPrice); // за афк срабатывание не запускаем анимацию снятие денег
+    // за афк срабатывание не запускаем анимацию снятие денег
+    if (!AFK) {
+        const { width } = this.sys.game.config;
+
+        this.EffectMinusCash(engineStore.userHintPrice, width / 2 + 30);
+    }
 
 
 
@@ -81,9 +85,12 @@ export function GetUserHint(AFK = true) {
     // Если подходящая карта найдена, создаем стрелку
     if (targetCard) {
         const cardPosition = targetCard.card;
-
-        // Спавним стрелку над картой, которая подходит
-        this.arrowHint = this.add.image(cardPosition.x + (cardPosition.width / 2) * this.UtilsGridScale(), cardPosition.y - 10, 'arrow')
+        //  cпавним стрелку над картой, которая подходит
+        this.arrowHint = this.add.image(
+            cardPosition.x + (cardPosition.width / 4),
+            cardPosition.y - 10 - (cardPosition.displayHeight / 2),
+            'arrow'
+        )
             .setOrigin(0.5)
             .setAlpha(1)
             .setRotation(Phaser.Math.DegToRad(-45))

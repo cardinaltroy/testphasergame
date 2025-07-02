@@ -1,24 +1,25 @@
 import { action, makeAutoObservable, makeObservable, observable } from "mobx";
 import UIMenu from "../components/sceneMenu/UIMenu";
 import UIGame from "../components/sceneGame/UIGame";
-import UIGameOver from "../components/sceneGameOver/UIGameOver";
 import Phaser from 'phaser';
 
 class engineStore {
-    // Коли міняємо сцену в грі, міняємо і UI інтерфейс для сцени також
-    // Данна система дозволить створювати інтерфейси і через Фазер, і через реакт :)
 
     constructor() {
         this.game/* : PhaserGame | null */ = null;
+        this.cards = 6; // колво карт в ряду
+        this.random = 100; // шанс смешивания карт, чем меньше тем меньше карт перетасовано меж собой
+        this.lastId = 0;
+        this.targetId = null;//для анимации
+
+        //Удалить весь react UI
         this.uiCurrent = 'sceneMenu'; // Стартовый UI 
         this.uiScenes = { // к каждой сцене свой UI подключаем
             sceneMenu: <UIMenu />,
             sceneGame: <UIGame />,
-            sceneGameOver: <UIGameOver />,
         };
-        this.difficultMode = 0; // удалить
-        this.cards = 6; // колво карт в ряду
-        this.random = 100; // шанс смешивания карт, чем меньше тем меньше карт перетасовано меж собой
+
+
 
         //user temp stats
         this.userPlayTIme = 0; // игровое время в раунде
@@ -28,12 +29,12 @@ class engineStore {
         this.userShufflesPrice = 50; // цена за 1 перемешенивание карт
         this.userHintPrice = 25; // цена за 1 перемешенивание карт
         this.userMoneyDropSteps = 3; // 10 кликов(удачных) осталось до шанса получить монетки
-        this.userAFKTimeout = 10; //через сколько секунд показать подсказку если не ходит юзер
+        this.userHintTimeouts = [1, 3, 5] // первый уровень срабатывание через секунду, второй - через 3сек и т.д...
+        this.levelsFinished = [0];
 
         makeObservable(this, {
             uiCurrent: observable,
             userPlayTIme: observable,
-            difficultMode: observable,
             setUI: action,
             update: action,
             setDifficult: action,
@@ -48,6 +49,26 @@ class engineStore {
         // when canvas unmount
         this.game = null;
         this.uiCurrent = 'sceneMenu'; // краще буде с null та обробляти його але це прототип лише, тай взагалі needed typescript for this :)
+    }
+
+    setLevelStars(lvl, stars) {
+        // Проверяем, новый ли уровень
+        const isNewLevel = lvl >= this.levelsFinished.length;
+
+        // Расширяем массив, если нужно
+        while (this.levelsFinished.length <= lvl) {
+            this.levelsFinished.push(0);
+        }
+
+        // Обновляем звезды, если текущее значение меньше
+        if (stars > this.levelsFinished[lvl]) {
+            this.levelsFinished[lvl] = stars;
+        }
+
+        // Если это новый уровень - устанавливаем targetId
+        if (isNewLevel) {
+            this.targetId = lvl;
+        }
     }
 
 
@@ -112,12 +133,15 @@ class engineStore {
         scene.GetUserHint(false);
     }
 
-    //кількість карт (4-13) та наскільки перемішанна партія( 1-100 % )
-    setDifficult(cards, random) {
-        if (!cards || !random) return;
+    //кількість карт (4-13) та наскільки перемішанна партія( 1-100 % ), id уровня - lvl
+    setDifficult(cards, random, id) {
+
+        if (cards == null || random == null || id == null) return;
+
 
         this.cards = cards;
         this.random = random;
+        this.lastId = id;
     }
 
     // USER

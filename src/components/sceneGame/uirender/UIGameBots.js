@@ -4,54 +4,87 @@ import engineStore from "../../../store/engineStore";
 export function UIGameBots() {
     const { width, height } = this.sys.game.config;
     const bots = botsStore.getCurrentBots;
-    const scale = this.UtilsGridScale() // return 0.75 : 1.2
+    const scale = this.UtilsGridScale(); // return 0.75 : 1.2
 
-    // Расстояние между панельками, чтобы они не перекрывались
     const panelSpacing = 10;
-    const panelWidth = 200; // Ширина панели
-    const panelHeight = 80;
-    // Вычисляем позицию начала (центрируем по горизонтали)
+    const panelWidth = 200 * scale;
+    const panelHeight = 65 * scale;
 
-    const startX = width / 2 - (bots.length * panelWidth / 2) + ((bots.length - 1) * panelSpacing )/ 2;
-    const startY = 40;
+    const totalBots = bots.length;
+    const startX = width / 2 - ((totalBots + 1) * panelWidth / 2) - (totalBots * panelSpacing) / 2;
+    const startY = 35 * scale;
 
-    /*console.log(width/2)
-    console.log(bots.length * panelWidth / 2)
-    console.log((bots.length - 1) * panelSpacing)
-    console.log(startX)*/
+    // ИГРОК
+    const player = bots[0];
+    const playerX = startX;
+    const playerY = startY;
 
-    // Создаем панели для каждого бота
-    bots.forEach((bot, index) => {
+    this.add.image(playerX, playerY, 'bot_panel')
+        .setOrigin(0, 0.5)
+        .setDepth(500)
+        .setDisplaySize(panelWidth, panelHeight);
 
-        // Позиция каждой панели
+    this.add.image(playerX + 10, playerY, `bot_${player.img}`)
+        .setOrigin(0, 0.5)
+        .setScale(0.6 * scale)
+        .setDepth(501);
+
+    this.add.text(playerX + panelWidth / 2, playerY - 15, "PLAYER", {
+        fontSize: `${18 * scale}px`,
+        color: 'black',
+        fontFamily: 'Arial'
+    })
+        .setOrigin(0, 0.5)
+        .setDepth(501);
+
+    this.add.image(playerX + 70 * scale, playerY + 10, 'bot_cards')
+        .setOrigin(0, 0.5)
+        .setScale(0.4 * scale)
+        .setDepth(501);
+
+    player.textCars = this.add.text(playerX + 120 * scale, playerY + 10, `--/${engineStore.cards * 4}`, {
+        fontSize: `${20 * scale}px`,
+        color: 'black',
+        fontFamily: 'Arial'
+    })
+        .setOrigin(0, 0.5)
+        .setDepth(501);
+
+    // Остальные — боты
+    bots.forEach((bot, i) => {
+        const index = i + 1; // сдвигаем индекс, т.к. игрок уже нарисован первым
         const x = startX + index * (panelWidth + panelSpacing);
         const y = startY;
 
-        // Панель как задний фон
         this.add.image(x, y, 'bot_panel')
-            .setOrigin(0.5)
+            .setOrigin(0, 0.5)
             .setDepth(500)
             .setDisplaySize(panelWidth, panelHeight);
 
-        // Изображение бота
-        this.add.image(x - 60, y, `bot_${bot.img}`)
-            .setOrigin(0.5)
-            .setScale(0.5)
-            .setDepth(501)
-        // Имя бота
-        this.add.text(x, y - 10, bot.name, { fontSize: '16px', color: 'black', fontFamily: 'Arial' })
-            .setOrigin(0.25, 0.5)
-            .setDepth(501)
+        this.add.image(x + 10, y, `bot_${bot.img}`)
+            .setOrigin(0, 0.5)
+            .setScale(0.6 * scale)
+            .setDepth(501);
 
-        // Количество карт
-        bot.textCars = this.add.text(x + 20, y + 10, `${bot.cardsFinished}/${engineStore.cards * 4}`, { fontSize: '14px', color: 'black', fontFamily: 'Arial' })
-            .setOrigin(0.5)
-            .setDepth(501)
+        this.add.text(x + panelWidth / 2, y - 15, bot.name, {
+            fontSize: `${18 * scale}px`,
+            color: 'black',
+            fontFamily: 'Arial'
+        })
+            .setOrigin(0, 0.5)
+            .setDepth(501);
 
-        // Изображение карт
-        this.add.image(x - 10, y + 10, 'bot_cards')
-            .setOrigin(0.5)
-            .setScale(0.2)
-            .setDepth(501)
+        this.add.image(x + 70 * scale, y + 10, 'bot_cards')
+            .setOrigin(0, 0.5)
+            .setScale(0.4 * scale)
+            .setDepth(501);
+
+        bot.textCars = this.add.text(x + 120 * scale, y + 10, `${bot.cardsFinished}/${engineStore.cards * 4}`, {
+            fontSize: `${20 * scale}px`,
+            color: 'black',
+            fontFamily: 'Arial'
+        })
+            .setOrigin(0, 0.5)
+            .setDepth(501);
     });
 }

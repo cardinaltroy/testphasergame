@@ -6,7 +6,7 @@ export function UIGameFooter() {
     const scale = this.UtilsGridScale()
     let panelX = width / 2;
     let panelY = height - 35 * scale;
-    
+
     // Панель
     this.add.sprite(width / 2, height, 'common1', 'panel7')
         .setOrigin(0.5, 1)
@@ -21,10 +21,10 @@ export function UIGameFooter() {
         .setDepth(501)
         .setScale(0.7 * scale)
 
-    const menu = this.add.sprite(panelX - 280 * scale, panelY, 'common1', 'tasks_button')
+    const menu = this.add.sprite(panelX - 280 * scale, panelY, 'common2', 'game_exit_icon')
         .setOrigin(0.5)
         .setDepth(501)
-        .setScale(0.7 * scale)
+        .setScale(0.3 * scale)
         .setInteractive({ useHandCursor: true });
 
     menu.on('pointerdown', () => {
@@ -43,10 +43,16 @@ export function UIGameFooter() {
         .setDepth(501);
 
     // Подсказка
-    const hint = this.add.sprite(panelX, panelY, 'common1', 'but_options3')
+    this.add.sprite(panelX, panelY, 'common1', 'but_options3')
         .setOrigin(0.5)
         .setDepth(501)
         .setScale(0.7 * scale)
+        .setInteractive({ useHandCursor: true });
+
+    const hint = this.add.image(panelX, panelY, 'icon_hint')
+        .setOrigin(0.5)
+        .setDepth(501)
+        .setScale(0.3 * scale)
         .setInteractive({ useHandCursor: true });
 
     hint.on('pointerdown', () => {
@@ -68,10 +74,16 @@ export function UIGameFooter() {
         .setDepth(502);
 
     // Перемешать
-    const shuffle = this.add.sprite(panelX + 140 * scale, panelY, 'common1', 'b_magic_out')
+    this.add.sprite(panelX + 140 * scale, panelY, 'common1', 'but_options3')
         .setOrigin(0.5)
         .setDepth(501)
         .setScale(0.7 * scale)
+        .setInteractive({ useHandCursor: true });
+
+    const shuffle = this.add.image(panelX + 140 * scale, panelY, 'icon_shuffle')
+        .setOrigin(0.5)
+        .setDepth(501)
+        .setScale(0.3 * scale)
         .setInteractive({ useHandCursor: true });
 
     shuffle.on('pointerdown', () => {

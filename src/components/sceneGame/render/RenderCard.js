@@ -15,6 +15,7 @@ export function RenderCard(scene, cell, value, suit, cardsArray) {
     const container = scene.add.container(cell.x, cell.y, [bg, face, suitIcon])
         .setSize(bg.width, bg.height)
         .setInteractive()
+        .setDepth(100)
         .setScale(0.7*scale);
 
     // Сохраняем ссылки на вложенные элементы

@@ -24,6 +24,7 @@ import { UIGameFooter } from './uirender/UIGameFooter';
 import { EffectShuffleArrow } from './render/EffectShuffleArrow';
 import { EffectFreeCash } from './render/EffectFreeCash';
 import { UIGameBots } from './uirender/UIGameBots';
+import { EffectMinusCash } from './render/EffectMinusCash';
 
 export class sceneGame extends Phaser.Scene {
     //ПО НЕМНОГУ РЕФАКТОРИМ ПРОЕКТ
@@ -67,6 +68,7 @@ export class sceneGame extends Phaser.Scene {
         this.EffectShuffleArrow = EffectShuffleArrow.bind(this)
         this.EffectFreeCash = EffectFreeCash.bind(this);
         this.EffectCardsParticles = EffectCardsParticles.bind(this);
+        this.EffectMinusCash = EffectMinusCash.bind(this);
 
         //UI
         this.UIGameFooter = UIGameFooter.bind(this);
@@ -100,18 +102,24 @@ export class sceneGame extends Phaser.Scene {
         if (this.lvlFinished) return;
         if (!winner) return;
 
+        let stars = winner.isBot ? botsStore.currentRound - 1 : 3;
+
+
         this.RenderCardsGameOver();
         botsStore.initNextRound(winner);
         this.RenderWinnerScreen(winner, botsStore.currentRound);
 
 
         if (winner.isBot) {
-            //console.log('турнир закончился победой бота', winner.name)
+            //console.log(`турнир №${engineStore.lastId + 1} закончился победой бота ${winner.name}, у игрока звёзд: ${stars}`)
+            engineStore.setLevelStars(engineStore.lastId, stars);
+            
             return this.time.delayedCall(6000, () => {
                 engineStore.setScene('sceneMenu')
             });
         } else if (botsStore.currentRound === 0) {
-            //console.log('на турнире победил игрок', winner.name)
+            //console.log(`турнир №${engineStore.lastId + 1} закончился победой игрока ${winner.name}, у игрока звёзд: ${stars}`)
+            engineStore.setLevelStars(engineStore.lastId, stars);
 
             return this.time.delayedCall(6000, () => {
                 engineStore.setScene('sceneMenu')
@@ -195,7 +203,7 @@ export class sceneGame extends Phaser.Scene {
                     this.UserValidMove(pointer, card, nearest, oldCell)
                 } else {
 
-                    this.EffectCardsParticles(pointer, 'sparkRed', 0.2);
+                    //this.EffectCardsParticles(pointer, 'sparkRed', 0.2);
 
                     this.tweens.add({
                         targets: card,
@@ -206,7 +214,7 @@ export class sceneGame extends Phaser.Scene {
                     });
                 }
             } else {
-                this.EffectCardsParticles(pointer, 'sparkRed', 0.2);
+                //this.EffectCardsParticles(pointer, 'sparkRed', 0.2);
                 this.tweens.add({
                     targets: card,
                     x: card.getData('originalX'),
@@ -261,12 +269,19 @@ export class sceneGame extends Phaser.Scene {
 
 
 
-            // например 10 сек юзер не ходил, показываем подсказку, и ждем пока дропнется счетчик для нового афк отсчета 
-            if (this.afkTimer < engineStore.userAFKTimeout) {
-                this.afkTimer++;
-            } else if (this.afkTimer === engineStore.userAFKTimeout) {
-                this.GetUserHint()
-                this.afkTimer++;
+
+            let currentTimeOut = engineStore.userHintTimeouts[engineStore.lvl];
+
+            // например 3 сек юзер не ходил, показываем подсказку, и ждем пока дропнется счетчик для нового афк отсчета 
+            if (currentTimeOut) {
+                if (this.afkTimer < currentTimeOut) {
+                    //console.log(this.afkTimer)
+                    this.afkTimer++;
+                } else if (this.afkTimer === currentTimeOut) {
+                    //console.log('check',this.afkTimer)
+                    this.GetUserHint();
+                    this.afkTimer++;
+                }
             }
 
         }

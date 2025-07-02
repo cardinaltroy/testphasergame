@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react';
 import Phaser from 'phaser';
 import sceneMenu from './sceneMenu/sceneMenu';
 import sceneGame from './sceneGame/sceneGame';
-import sceneGameOver from './sceneGameOver/sceneGameOver';
 import engineStore from '../store/engineStore';
 import { observer } from 'mobx-react-lite';
 
@@ -15,7 +14,7 @@ const GameCanvas = observer(() => {
             width: window.innerWidth,
             height: window.innerHeight,
             backgroundColor: 'black',
-            scene: [sceneMenu, sceneGame, sceneGameOver],
+            scene: [sceneMenu, sceneGame],
             scale: {
                 mode: Phaser.Scale.RESIZE,
                 autoCenter: Phaser.Scale.CENTER_BOTH,

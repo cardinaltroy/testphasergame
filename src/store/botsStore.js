@@ -7,10 +7,13 @@ class botsStore {
         this.pause = true;
         this.bots = [];
         this.losers = [];
+
         this.currentRound = 0;
+        this.roundsFinished = 0
+        
         this.botsPlaySpeed = 5;
         this.botsPlaySpeedTolerance = 1;
-        this.botsSpawnMax = 4;
+        this.botsSpawnMax = 3;
         makeAutoObservable(this)
     }
     initNextRound(winner = false) {
@@ -66,7 +69,7 @@ class botsStore {
         this.bots.forEach(bot => {
 
             if (bot.cardsFinished === bot.maxCards) {
-                this.clearAll();
+                //this.clearAll();
                 return engineStore.finishGame(bot);
             }
 

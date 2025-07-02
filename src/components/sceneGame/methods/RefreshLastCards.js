@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
 import engineStore from '../../../store/engineStore';
-import { EffectMinusCash } from '../render/EffectMinusCash';
 
 export function RefreshLastCards() {
     const targetCells = this.grid;
@@ -19,7 +18,7 @@ export function RefreshLastCards() {
             cell.occupied = false;
         }
     }
-    
+
     const emptyCells = targetCells.filter(cell => !cell.occupied);
 
     // Функция проверки, перемещалась ли хотя бы одна карта
@@ -32,7 +31,7 @@ export function RefreshLastCards() {
             const cell = emptyCells[i];
 
             // если координаты карты и клетки не совпадают, значит хотя бы 1 карта переместилась
-            if (oldCell.col !== cell.col || oldCell.row !== cell.row) flag = true; 
+            if (oldCell.col !== cell.col || oldCell.row !== cell.row) flag = true;
         }
         return flag;
     };
@@ -78,5 +77,8 @@ export function RefreshLastCards() {
     this.lastMove = null;
 
     // --- ЭФФЕКТ СНЯТИЯ ДЕНЕГ ---
-    EffectMinusCash(this, engineStore.userShufflesPrice);
+    const scale = this.UtilsGridScale()
+    const { width } = this.sys.game.config;
+
+    this.EffectMinusCash(engineStore.userShufflesPrice, width / 2 + 160 * scale);
 }
