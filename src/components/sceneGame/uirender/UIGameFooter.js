@@ -28,8 +28,9 @@ export function UIGameFooter() {
         .setInteractive({ useHandCursor: true });
 
     menu.on('pointerdown', () => {
-        engineStore.setScene('sceneMenu');
-        botsStore.clearAll();
+        //engineStore.setScene('sceneMenu');
+        //botsStore.clearAll();
+        this.UIGameDialogExitShow(true)
     });
 
     // Игровая валюта
@@ -38,7 +39,7 @@ export function UIGameFooter() {
         .setDepth(501)
         .setScale(0.7 * scale)
 
-    this.uiGameFooterMoney = this.add.text(panelX - 110 * scale, panelY, engineStore.userCash, { fontSize: `${30 * scale}px`, color: '#fff', fontFamily: 'monospace' })
+    this.ui.UIGameFooterMoney = this.add.text(panelX - 110 * scale, panelY, engineStore.userCash, { fontSize: `${30 * scale}px`, color: '#fff', fontFamily: 'monospace' })
         .setOrigin(0.5)
         .setDepth(501);
 
@@ -119,4 +120,8 @@ export function UIGameFooter() {
     undo.on('pointerdown', () => {
         engineStore.undoMove();
     });
+}
+
+export function UIGameFooterUpdate() {
+    this.ui.UIGameFooterMoney.setText(engineStore.userCash);
 }

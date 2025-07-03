@@ -95,7 +95,7 @@ export function GetUserHint(AFK = true) {
             .setAlpha(1)
             .setRotation(Phaser.Math.DegToRad(-45))
             .setInteractive()
-            .setDepth(1000)
+            .setDepth(505)
             .setScale(0.5);
 
         //  cохраняем ячейку, куда нужно положить карту

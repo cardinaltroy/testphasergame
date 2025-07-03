@@ -19,7 +19,7 @@ export function UserValidMove(pointer, card, nearest, oldCell) {
         ease: 'Power2'
     });
 
-    this.lastMove = {
+    this.ui.UIGameFooterUndo = {
         card: card,
         oldX: card.getData('originalX'),
         oldY: card.getData('originalY'),

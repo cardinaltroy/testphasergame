@@ -3,8 +3,8 @@ export function CreateGrid() {
     const cols = this.columns;
     const rows = 4;
     const scale = this.UtilsGridScale()
-    const spacingX = 75*scale;
-    const spacingY = 105*scale;
+    const spacingX = 75 * scale;
+    const spacingY = 105 * scale;
 
     const fieldWidth = (cols - 1) * spacingX;
     const fieldHeight = (rows - 1) * spacingY;
@@ -22,7 +22,7 @@ export function CreateGrid() {
             // Создаём спрайт ячейки
             const placeSprite = this.add.image(x, y, 'card_place')
                 .setOrigin(0.5)
-                .setScale(0.7*scale)
+                .setScale(0.7 * scale)
 
             // Можно добавить интерактивность, если нужно, например:
             // placeSprite.setInteractive();

@@ -5,7 +5,7 @@ import botsStore from '../../store/botsStore';
 
 const UIMenu = observer(() => {
     const isWaiting = botsStore.currentRound != 0;
-    if(!isWaiting) return;
+     return;//if(!isWaiting)
     return (
         <div className="UI Menu">
             <div className="menuDiff" style={{

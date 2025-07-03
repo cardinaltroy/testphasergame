@@ -1,72 +1,30 @@
 import botsStore from "../../../store/botsStore";
 import engineStore from "../../../store/engineStore";
+import userStore from "../../../store/userStore";
 
 export function UIGameBots() {
-    const { width, height } = this.sys.game.config;
+    const { width } = this.sys.game.config;
     const bots = botsStore.getCurrentBots;
-    const scale = this.UtilsGridScale(); // return 0.75 : 1.2
-
+    const scale = this.UtilsGridScale();
     const panelSpacing = 10;
     const panelWidth = 200 * scale;
     const panelHeight = 65 * scale;
-
-    const totalBots = bots.length;
-    const startX = width / 2 - ((totalBots + 1) * panelWidth / 2) - (totalBots * panelSpacing) / 2;
     const startY = 35 * scale;
 
-    // ИГРОК
-    const player = bots[0];
-    const playerX = startX;
-    const playerY = startY;
+    this.ui.UIGameBotsContainers = [];
 
-    this.add.image(playerX, playerY, 'bot_panel')
-        .setOrigin(0, 0.5)
-        .setDepth(500)
-        .setDisplaySize(panelWidth, panelHeight);
-
-    this.add.image(playerX + 10, playerY, `bot_${player.img}`)
-        .setOrigin(0, 0.5)
-        .setScale(0.6 * scale)
-        .setDepth(501);
-
-    this.add.text(playerX + panelWidth / 2, playerY - 15, "PLAYER", {
-        fontSize: `${18 * scale}px`,
-        color: 'black',
-        fontFamily: 'Arial'
-    })
-        .setOrigin(0, 0.5)
-        .setDepth(501);
-
-    this.add.image(playerX + 70 * scale, playerY + 10, 'bot_cards')
-        .setOrigin(0, 0.5)
-        .setScale(0.4 * scale)
-        .setDepth(501);
-
-    player.textCars = this.add.text(playerX + 120 * scale, playerY + 10, `--/${engineStore.cards * 4}`, {
-        fontSize: `${20 * scale}px`,
-        color: 'black',
-        fontFamily: 'Arial'
-    })
-        .setOrigin(0, 0.5)
-        .setDepth(501);
-
-    // Остальные — боты
-    bots.forEach((bot, i) => {
-        const index = i + 1; // сдвигаем индекс, т.к. игрок уже нарисован первым
-        const x = startX + index * (panelWidth + panelSpacing);
-        const y = startY;
-
-        this.add.image(x, y, 'bot_panel')
+    const createContainer = (name, imgKey, finishedCards) => {
+        const panel = this.add.image(0, 0, 'bot_panel')
             .setOrigin(0, 0.5)
             .setDepth(500)
             .setDisplaySize(panelWidth, panelHeight);
 
-        this.add.image(x + 10, y, `bot_${bot.img}`)
+        const avatar = this.add.image(10, 0, imgKey)
             .setOrigin(0, 0.5)
             .setScale(0.6 * scale)
             .setDepth(501);
 
-        this.add.text(x + panelWidth / 2, y - 15, bot.name, {
+        const nameText = this.add.text(panelWidth / 2, -15, name, {
             fontSize: `${18 * scale}px`,
             color: 'black',
             fontFamily: 'Arial'
@@ -74,17 +32,74 @@ export function UIGameBots() {
             .setOrigin(0, 0.5)
             .setDepth(501);
 
-        this.add.image(x + 70 * scale, y + 10, 'bot_cards')
+        const cardsImg = this.add.image(70 * scale, 10, 'bot_cards')
             .setOrigin(0, 0.5)
             .setScale(0.4 * scale)
             .setDepth(501);
 
-        bot.textCars = this.add.text(x + 120 * scale, y + 10, `${bot.cardsFinished}/${engineStore.cards * 4}`, {
+        const cardsText = this.add.text(120 * scale, 10, `${finishedCards}/${engineStore.cards * 4}`, {
             fontSize: `${20 * scale}px`,
             color: 'black',
             fontFamily: 'Arial'
         })
             .setOrigin(0, 0.5)
             .setDepth(501);
+
+        const container = this.add.container(0, startY, [panel, avatar, nameText, cardsImg, cardsText]);
+        container.cardsFinished = finishedCards;
+        return { container, cardsText };
+    };
+
+    // Игрок
+    const player = bots[0];
+    const { container: userContainer, cardsText: userCardsText } = createContainer("PLAYER", userStore.userImg, this.GetCompletedCard());
+    this.uiGameBotsUser = userCardsText;
+    this.ui.UIGameBotsContainers.push(userContainer);
+
+    // Боты
+    bots.forEach(bot => {
+        const { container, cardsText } = createContainer(bot.name, `bot_${bot.img}`, bot.cardsFinished);
+        bot.textCars = cardsText;
+        container.cardsFinished = bot.cardsFinished;
+        this.ui.UIGameBotsContainers.push(container);
+    });
+
+    this.UIGameBotsUpdate(); // сразу выравниваем
+}
+
+
+export function UIGameBotsUpdate() {
+    const { width } = this.sys.game.config;
+    const scale = this.UtilsGridScale();
+    const panelSpacing = 10;
+    const panelWidth = 200 * scale;
+    const total = this.ui.UIGameBotsContainers.length;
+
+    // Сортировка по количеству собранных карт (X из "X/Y")
+    const parseCards = (container) => {
+        const textObj = container.list.find(child => child?.style && child.text?.includes('/'));
+        return textObj ? parseInt(textObj.text.split('/')[0]) : 0;
+    };
+
+    this.ui.UIGameBotsContainers.sort((a, b) => parseCards(b) - parseCards(a));
+
+    // Центрируем панели
+    const totalWidth = total * panelWidth + (total - 1) * panelSpacing;
+    const startX = width / 2 - totalWidth / 2;
+
+    // Получаем общее Y (все панели на одной высоте)
+    const y = 35 * scale;
+
+    // Распределение по X
+    this.ui.UIGameBotsContainers.forEach((container, index) => {
+        const targetX = startX + index * (panelWidth + panelSpacing);
+
+        this.tweens.add({
+            targets: container,
+            x: targetX,
+            y: y,
+            duration: 300,
+            ease: 'Sine.easeInOut'
+        });
     });
 }

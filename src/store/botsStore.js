@@ -1,4 +1,3 @@
-import { makeAutoObservable } from "mobx";
 import { botsList } from "../content/botsList";
 import engineStore from "./engineStore";
 
@@ -10,12 +9,12 @@ class botsStore {
 
         this.currentRound = 0;
         this.roundsFinished = 0
-        
+
         this.botsPlaySpeed = 5;
         this.botsPlaySpeedTolerance = 1;
         this.botsSpawnMax = 3;
-        makeAutoObservable(this)
     }
+
     initNextRound(winner = false) {
         //ПОбежадет бот, дропаем всё
         if (winner.isBot) return this.clearAll();
@@ -44,6 +43,7 @@ class botsStore {
 
         if (loserIndex !== -1) {
             const [loserBot] = this.bots.splice(loserIndex, 1);
+            loserBot.loser = true;
             this.losers.push(loserBot);
             //console.log(`${loserBot.name} проиграл(а) и исключён(а)`);
         }
@@ -57,15 +57,16 @@ class botsStore {
             return this.clearAll();
         }
     }
+
     setPause(value = true) {
         this.pause = value;
     }
-
 
     update() {
         if (this.pause) return;
 
         if (!this.bots.length) return;
+
         this.bots.forEach(bot => {
 
             if (bot.cardsFinished === bot.maxCards) {
@@ -89,8 +90,6 @@ class botsStore {
     get getCurrentBots() {
         return this.bots;
     }
-
-
 
     spawn(amount, clearSpawn = false) {
         if (!amount || amount === 0) return null;
@@ -135,10 +134,6 @@ class botsStore {
         this.bots = selectedBots;
         return selectedBots;
     }
-
-
-
-
 
     clearAll() {
         this.bots = [];

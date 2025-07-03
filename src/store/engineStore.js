@@ -1,4 +1,3 @@
-import { action, makeAutoObservable, makeObservable, observable } from "mobx";
 import UIMenu from "../components/sceneMenu/UIMenu";
 import UIGame from "../components/sceneGame/UIGame";
 import Phaser from 'phaser';
@@ -6,11 +5,16 @@ import Phaser from 'phaser';
 class engineStore {
 
     constructor() {
+        this.uiFont = ''
+        this.uiFontColor = ''
+        this.uiFontColorSecondary = ''
+
         this.game/* : PhaserGame | null */ = null;
         this.cards = 6; // колво карт в ряду
         this.random = 100; // шанс смешивания карт, чем меньше тем меньше карт перетасовано меж собой
         this.lastId = 0;
         this.targetId = null;//для анимации
+        this.levelsFinished = [];
 
         //Удалить весь react UI
         this.uiCurrent = 'sceneMenu'; // Стартовый UI 
@@ -18,8 +22,6 @@ class engineStore {
             sceneMenu: <UIMenu />,
             sceneGame: <UIGame />,
         };
-
-
 
         //user temp stats
         this.userPlayTIme = 0; // игровое время в раунде
@@ -30,20 +32,14 @@ class engineStore {
         this.userHintPrice = 25; // цена за 1 перемешенивание карт
         this.userMoneyDropSteps = 3; // 10 кликов(удачных) осталось до шанса получить монетки
         this.userHintTimeouts = [1, 3, 5] // первый уровень срабатывание через секунду, второй - через 3сек и т.д...
-        this.levelsFinished = [0];
-
-        makeObservable(this, {
-            uiCurrent: observable,
-            userPlayTIme: observable,
-            setUI: action,
-            update: action,
-            setDifficult: action,
-            shuffleLastCards: action,
-            showUserHint: action,
-        })
     }
     update() {
         this.userPlayTIme += 1;
+        if (this.game && this.uiCurrent === 'sceneGame') {
+            let scene = this.game.scene.getScene('sceneGame');
+
+            scene.uiGameBotsUser.setText(`${scene.GetCompletedCard()}/${this.cards * 4}`)
+        }
     }
     unmount() {
         // when canvas unmount

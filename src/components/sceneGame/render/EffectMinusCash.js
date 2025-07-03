@@ -1,5 +1,7 @@
+import engineStore from "../../../store/engineStore";
+
 export function EffectMinusCash(cash, posX = this.cameras.main.width / 2, posY = this.cameras.main.height - 50) {
-    this.updateUI()
+    this.UIGameFooterUpdate();
 
     const text = this.add.text(posX, posY, `-${cash}`, {
         font: '32px Arial',

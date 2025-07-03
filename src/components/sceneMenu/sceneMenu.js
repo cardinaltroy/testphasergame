@@ -3,16 +3,39 @@ import engineStore from '../../store/engineStore';
 import { gameMap } from '../../content/gameMap';
 import botsStore from '../../store/botsStore';
 import { RenderUserFrame, RenderUserFrameMove } from './render/RenderUserFrame';
+import { UIMenuPlay } from './uirender/UIMenuPlay';
+import { RenderBackground } from './render/RenderBackground';
+import { RenderUserLevels } from './render/RenderUserLevels';
+import { UIMenuDialogWaiting, UIMenuDialogWaitingShow } from './uirender/UIMenuDialogWaiting';
+import { UtilsGridScale } from './methods/UtilsGridScale';
 
 class sceneMenu extends Phaser.Scene {
     constructor() {
         super('sceneMenu');
 
+
+        //ui temp
+        this.ui = {
+            UIMenuDialogWaiting: null, // для окна ожидания противников
+        }
+
+        //methods
+        this.UtilsGridScale = UtilsGridScale.bind(this);
+
+        //UI
+        this.UIMenuPlay = UIMenuPlay.bind(this);
+        this.UIMenuDialogWaiting = UIMenuDialogWaiting.bind(this);
+        this.UIMenuDialogWaitingShow = UIMenuDialogWaitingShow.bind(this);
+
         //Render
-        this.RenderUserFrame = RenderUserFrame.bind(this)
-        this.RenderUserFrameMove = RenderUserFrameMove.bind(this)
+        this.RenderBackground = RenderBackground.bind(this);
+        this.RenderUserLevels = RenderUserLevels.bind(this);
+        this.RenderUserFrame = RenderUserFrame.bind(this);
+        this.RenderUserFrameMove = RenderUserFrameMove.bind(this);
+
     }
     preload() {
+
         // assetloader надо нормальный написать
 
         this.load.image('back', './back.webp');
@@ -63,104 +86,18 @@ class sceneMenu extends Phaser.Scene {
     }
 
     create() {
-        //ОТРЕФАКТОРИТЬ НА МЕТОДЫ
-        const bg = this.add.image(0, 0, 'gameMap1').setOrigin(0, 0);
-
-        const screenHeight = this.cameras.main.height;
-        const screenWidth = this.cameras.main.width;
-
-        const texture = this.textures.get('back');
-        const frame = texture.getSourceImage();
-
-        const originalWidth = frame.width;
-        const originalHeight = frame.height;
-
-        const scale = screenHeight / originalHeight;
-        bg.setScale(scale);
-        bg.x = (screenWidth - originalWidth * scale) / 2;
-
-        // Коэффициент сдвига карты для кнопок (если сдвинули по x, нужно компенсировать)
-        const offsetX = bg.x;
-        const offsetY = 0; // bg.y == 0, так как Origin(0,0)
-        const buttonScale = this.sys.game.device.os.android || this.sys.game.device.os.iOS ? 0.7 : 1;
-        // Отрисовка кнопок уровней
-        gameMap.forEach((point, index) => {
-            const button = this.add.image(
-                offsetX + point.x * scale,
-                offsetY + point.y * scale,
-                'menuButton'
-            ).setScale(buttonScale).setInteractive({ useHandCursor: true });
-
-            this.add.sprite(
-                offsetX + point.x * scale,
-                offsetY + (point.y + 3) * scale,
-                'common1', 'level_item_passed'
-            ).setScale(buttonScale)
-
-            // Добавим текст (название уровня)
-            this.add.text(
-                button.x,
-                button.y - 10,
-                point.title,
-                {
-                    fontSize: `${buttonScale * 25}px`,
-                    color: '#fff',
-                    fontFamily: 'monospace'
-                }
-            ).setOrigin(0.5);
-
-            //Запускаем раунд, спавним ботов
-            button.on('pointerdown', () => {
-                engineStore.setDifficult(point.cards, point.random, point.id);
-                botsStore.initNextRound();
-            });
-
-            // === Рисуем юзера ===
-            let maxLevel = engineStore.levelsFinished.length - 1;
-            let target = engineStore.targetId;
-
-            if (target !== null) {// с анимацией
-                point.id === maxLevel - 1 && this.RenderUserFrame(button, scale);
-                point.id === maxLevel && this.RenderUserFrameMove(button);
-            } else {//без анимации
-                point.id === maxLevel && this.RenderUserFrame(button, scale);
-            }
-
-        });
+        this.RenderBackground();
+        this.RenderUserLevels();
+        this.UIMenuPlay();
+        this.UIMenuDialogWaiting();
 
         // Убедиться, что контейнер юзера выше всех
         if (this.userContainer) {
             this.children.bringToTop(this.userContainer);
         }
 
-
-        // Отладка: клик — координаты
-        this.input.on('pointerdown', (pointer) => {
-            //console.log(`x: ${pointer.worldX.toFixed(0)}, y: ${pointer.worldY.toFixed(0)}`);
-        });
-
-
-
-        const { width, height } = this.sys.game.config;
-        const buttPlay = this.add.image(width / 2, height - 50, 'bot_panel').setScale(0.7).setOrigin(0.5).setInteractive({ useHandCursor: true });
-        this.add.text(
-            width / 2,
-            height - 50,
-            'PLAY',
-            {
-                fontSize: `40px`,
-                color: 'black',
-                fontFamily: 'monospace'
-            }
-        ).setOrigin(0.5)
-
-        buttPlay.on('pointerdown', () => {
-            let lvlPlay = gameMap[engineStore.levelsFinished.length - 1];
-
-            engineStore.setDifficult(lvlPlay.cards, lvlPlay.random, lvlPlay.id);
-            botsStore.initNextRound();
-        })
-
+        // for debag coords
+        //this.input.on('pointerdown', pointer => { console.log(`x: ${pointer.worldX.toFixed(0)}, y: ${pointer.worldY.toFixed(0)}`); });
     }
 }
 

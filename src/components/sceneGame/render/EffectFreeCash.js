@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
 import engineStore from '../../../store/engineStore';
-import { EffectCardsParticles } from './EffectCardsParticles';
 
 export function EffectFreeCash(nearest) {
     const screenWidth = this.scale.width;
@@ -75,7 +74,7 @@ export function EffectFreeCash(nearest) {
             onComplete: () => {
                 container.destroy();
                 engineStore.addCash(5);
-                this.updateUI()
+                this.UIGameFooterUpdate();
                 this.EffectCardsParticles({ x: panelX - 170 * scale, y: panelY, }, 'sparkRed', 1.2);
             }
         });

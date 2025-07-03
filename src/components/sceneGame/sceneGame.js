@@ -20,11 +20,13 @@ import botsStore from '../../store/botsStore';
 import { RenderCardsGameOver } from './render/RenderCardsGameOver';
 import { RenderWinnerScreen } from './render/RenderWinnerScreen';
 import { GetUserHintSecond } from './methods/GetUserHintSecond';
-import { UIGameFooter } from './uirender/UIGameFooter';
+import { UIGameFooter, UIGameFooterUpdate } from './uirender/UIGameFooter';
 import { EffectShuffleArrow } from './render/EffectShuffleArrow';
 import { EffectFreeCash } from './render/EffectFreeCash';
-import { UIGameBots } from './uirender/UIGameBots';
+import { UIGameBots, UIGameBotsUpdate } from './uirender/UIGameBots';
 import { EffectMinusCash } from './render/EffectMinusCash';
+import { GetCompletedCard } from './methods/GetCompletedCard';
+import { UIGameDialogExit, UIGameDialogExitShow } from './uirender/UIGameDialogExit';
 
 export class sceneGame extends Phaser.Scene {
     //ПО НЕМНОГУ РЕФАКТОРИМ ПРОЕКТ
@@ -33,11 +35,18 @@ export class sceneGame extends Phaser.Scene {
         //temp
         this.cardsData = []; // всі карти
         this.grid = []; // сітка зі слотами для карт
-        this.lastMove = null; // для undo
         this.elapsed = 0; // для таймеру
         this.hintsAvailable = 0; // кол-во доступных ходов в текущий момент. Для эффектов 
         this.lvlFinished = false; // стейт для эффекта стрелки возле кнопки перемешивания, что игра закончена
-        this.afkTimer = 0;
+        this.afkTimer = 0; // для подсказок
+
+        //ui temp
+        this.ui = {
+            UIGameBotsContainers: null, // для сортировки списка "игроков"
+            UIGameDialogExit: null,
+            UIGameFooterUndo: null, // для undo последнее перемещение
+            UIGameFooterMoney: null, //для перерендера денег
+        }
 
         //config
         this.config();
@@ -55,6 +64,7 @@ export class sceneGame extends Phaser.Scene {
         this.UserValidMove = UserValidMove.bind(this);
         this.GetUserHint = GetUserHint.bind(this);
         this.GetUserHintSecond = GetUserHintSecond.bind(this);
+        this.GetCompletedCard = GetCompletedCard.bind(this);
 
         this.UtilsGetCardValue = UtilsGetCardValue.bind(this);
         this.UtilsGetNearestFreeCell = UtilsGetNearestFreeCell.bind(this);
@@ -64,15 +74,19 @@ export class sceneGame extends Phaser.Scene {
         this.RenderCardsFlyInAnimation = RenderCardsFlyInAnimation.bind(this);
         this.RenderCardsRevealAnimation = RenderCardsRevealAnimation.bind(this);
         this.RenderCardsGameOver = RenderCardsGameOver.bind(this);
-        this.RenderWinnerScreen = RenderWinnerScreen.bind(this)
-        this.EffectShuffleArrow = EffectShuffleArrow.bind(this)
+        this.RenderWinnerScreen = RenderWinnerScreen.bind(this);
+        this.EffectShuffleArrow = EffectShuffleArrow.bind(this);
         this.EffectFreeCash = EffectFreeCash.bind(this);
         this.EffectCardsParticles = EffectCardsParticles.bind(this);
         this.EffectMinusCash = EffectMinusCash.bind(this);
 
         //UI
-        this.UIGameFooter = UIGameFooter.bind(this);
         this.UIGameBots = UIGameBots.bind(this);
+        this.UIGameBotsUpdate = UIGameBotsUpdate.bind(this);
+        this.UIGameDialogExit = UIGameDialogExit.bind(this);
+        this.UIGameDialogExitShow = UIGameDialogExitShow.bind(this);
+        this.UIGameFooter = UIGameFooter.bind(this);
+        this.UIGameFooterUpdate = UIGameFooterUpdate.bind(this);
     }
 
     config() {
@@ -113,7 +127,7 @@ export class sceneGame extends Phaser.Scene {
         if (winner.isBot) {
             //console.log(`турнир №${engineStore.lastId + 1} закончился победой бота ${winner.name}, у игрока звёзд: ${stars}`)
             engineStore.setLevelStars(engineStore.lastId, stars);
-            
+
             return this.time.delayedCall(6000, () => {
                 engineStore.setScene('sceneMenu')
             });
@@ -147,8 +161,10 @@ export class sceneGame extends Phaser.Scene {
         this.RenderCardsRevealAnimation();// разворот карт
         this.CheckFinishedLines(true); // проверка карт которые заблокировать и затемнить. true - что бы сбросить всё при новом уровне
 
-        this.UIGameFooter();
         this.UIGameBots();
+        this.UIGameDialogExit();
+        this.UIGameFooter();
+
 
         this.input.on('dragstart', (pointer, gameObject) => {
             this.children.bringToTop(gameObject);
@@ -245,9 +261,6 @@ export class sceneGame extends Phaser.Scene {
     dropAFK() {
         this.afkTimer = 0;
     }
-    updateUI() {
-        this.uiGameFooterMoney.setText(engineStore.userCash);
-    }
 
     update(time, delta) {
 
@@ -256,9 +269,10 @@ export class sceneGame extends Phaser.Scene {
         // Раз в секунду
         if (this.elapsed >= 1000) {
             this.elapsed -= 1000
-
             //Просто апдейтим
             engineStore.update();
+            this.UIGameBotsUpdate();
+
             this.isLevelStarted && botsStore.update(); // адпейтим после того как карты разложились
 
             //ждем начало уровня(что бы карты все разложились)
@@ -270,8 +284,7 @@ export class sceneGame extends Phaser.Scene {
 
 
 
-            let currentTimeOut = engineStore.userHintTimeouts[engineStore.lvl];
-
+            let currentTimeOut = engineStore.userHintTimeouts[engineStore.lastId];
             // например 3 сек юзер не ходил, показываем подсказку, и ждем пока дропнется счетчик для нового афк отсчета 
             if (currentTimeOut) {
                 if (this.afkTimer < currentTimeOut) {

@@ -1,12 +1,12 @@
 export function UndoMove() {
-    if (this.lastMove) {
+    if (this.ui.UIGameFooterUndo) {
         const {
             card,    // контейнер карты
             oldX,
             oldY,
             oldCell,
             nearest
-        } = this.lastMove;
+        } = this.ui.UIGameFooterUndo;
 
         // Возвращаем контейнер в исходную позицию
         card.x = oldX;
@@ -38,7 +38,7 @@ export function UndoMove() {
         this.input.setDraggable(card, true);
         card.setData('locked', false);
 
-        this.lastMove = null;
+        this.ui.UIGameFooterUndo = null;
 
         this.check()
     }
