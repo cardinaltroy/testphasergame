@@ -90,6 +90,8 @@ export class sceneGame extends Phaser.Scene {
     }
 
     config() {
+        this.ui.UIGameBotsContainers = null;
+
         this.cardWidth = 41;
         this.cardHeight = 59;
         this.suits = 4;
@@ -155,13 +157,11 @@ export class sceneGame extends Phaser.Scene {
             .setDisplaySize(this.cameras.main.width, this.cameras.main.height);
 
         this.CreateGrid(); // создаем сетку
-
         this.CreateCards(); // подготовка карт, создали и перемешали
         this.RenderCardsFlyInAnimation(); // анимаия прилета карт
         this.RenderCardsRevealAnimation();// разворот карт
         this.CheckFinishedLines(true); // проверка карт которые заблокировать и затемнить. true - что бы сбросить всё при новом уровне
 
-        this.UIGameBots();
         this.UIGameDialogExit();
         this.UIGameFooter();
 
@@ -269,11 +269,15 @@ export class sceneGame extends Phaser.Scene {
         // Раз в секунду
         if (this.elapsed >= 1000) {
             this.elapsed -= 1000
+            botsStore.bots.length && console.log(botsStore.bots[0].cardsFinished)
             //Просто апдейтим
             engineStore.update();
+
+            this.UIGameBots();
             this.UIGameBotsUpdate();
 
             this.isLevelStarted && botsStore.update(); // адпейтим после того как карты разложились
+
 
             //ждем начало уровня(что бы карты все разложились)
             if (!this.isLevelStarted) {

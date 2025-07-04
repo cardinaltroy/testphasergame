@@ -3,7 +3,7 @@ import engineStore from '../../store/engineStore';
 import { gameMap } from '../../content/gameMap';
 import botsStore from '../../store/botsStore';
 import { RenderUserFrame, RenderUserFrameMove } from './render/RenderUserFrame';
-import { UIMenuPlay } from './uirender/UIMenuPlay';
+import { UIMenuPlay, UIMenuPlayShow } from './uirender/UIMenuPlay';
 import { RenderBackground } from './render/RenderBackground';
 import { RenderUserLevels } from './render/RenderUserLevels';
 import { UIMenuDialogWaiting, UIMenuDialogWaitingShow } from './uirender/UIMenuDialogWaiting';
@@ -17,6 +17,7 @@ class sceneMenu extends Phaser.Scene {
         //ui temp
         this.ui = {
             UIMenuDialogWaiting: null, // для окна ожидания противников
+            UIMenuPlay: null,
         }
 
         //methods
@@ -24,6 +25,7 @@ class sceneMenu extends Phaser.Scene {
 
         //UI
         this.UIMenuPlay = UIMenuPlay.bind(this);
+        this.UIMenuPlayShow = UIMenuPlayShow.bind(this);
         this.UIMenuDialogWaiting = UIMenuDialogWaiting.bind(this);
         this.UIMenuDialogWaitingShow = UIMenuDialogWaitingShow.bind(this);
 

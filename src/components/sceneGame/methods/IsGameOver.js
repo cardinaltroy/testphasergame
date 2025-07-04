@@ -1,3 +1,5 @@
+import userStore from "../../../store/userStore";
+
 
 export function IsGameOver() {
     const rows = 4;
@@ -30,5 +32,7 @@ export function IsGameOver() {
     if (sequence.length === 0) return;
 
     //рендерим анимацию сбора карт
-    this.finish({ name: 'USERNAME', isBot: false })
+    let user = userStore.dataGet;
+
+    this.finish({ name: user.name, isBot: false })
 }

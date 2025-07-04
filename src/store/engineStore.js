@@ -37,7 +37,7 @@ class engineStore {
         this.userPlayTIme += 1;
         if (this.game && this.uiCurrent === 'sceneGame') {
             let scene = this.game.scene.getScene('sceneGame');
-
+            if (scene.ui.UIGameBotsContainers === null) return;
             scene.uiGameBotsUser.setText(`${scene.GetCompletedCard()}/${this.cards * 4}`)
         }
     }
@@ -48,6 +48,8 @@ class engineStore {
     }
 
     setLevelStars(lvl, stars) {
+        if (!stars) return;
+
         // Проверяем, новый ли уровень
         const isNewLevel = lvl >= this.levelsFinished.length;
 

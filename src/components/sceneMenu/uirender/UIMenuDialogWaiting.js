@@ -14,9 +14,13 @@ export function UIMenuDialogWaiting() {
         .setOrigin(0.5)
         .setInteractive();
 
+
+
     const title = this.add.text(0, 35 * scale - contHeight / 2, 'WAITING OTHERS...', {
         fontSize: `${30 * scale}px`, color: 'black', fontFamily: 'monospace',
     }).setOrigin(0.5);
+
+
 
     // так надо :)
     let rnd = botsStore.currentRound === 0 ? 1 : botsStore.currentRound;
@@ -25,9 +29,17 @@ export function UIMenuDialogWaiting() {
         fontSize: `${20 * scale}px`, color: 'grey', fontFamily: 'monospace',
     }).setOrigin(0.5);
 
+    const buttonClose = this.add.sprite(contWidth / 2 - 15 * scale, -contHeight / 2 + 10 * scale, 'common1', 'icon_close')
+        .setOrigin(0.5)
+        .setInteractive({ useHandCursor: true })
+        .on('pointerdown', () => {
+            this.UIMenuDialogWaitingShow(false)
+            botsStore.clearAll();
+        })
+
     // Пустой контейнер
-    this.ui.UIGameDialogWaiting = this.add.container(startX, height + contHeight / 2, [
-        background, title, titleRound
+    this.ui.UIMenuDialogWaiting = this.add.container(startX, height + contHeight / 2, [
+        background, title, titleRound, buttonClose
     ]).setDepth(1000);
 
     if (botsStore.currentRound !== 0) this.UIMenuDialogWaitingShow(true)
@@ -35,13 +47,13 @@ export function UIMenuDialogWaiting() {
 
 //вызываем только здесь поэтому без экспорта и через scene
 function UIMenuDialogWaitingBots(scene) {
-    const container = scene.ui.UIGameDialogWaiting;
+    const container = scene.ui.UIMenuDialogWaiting;
     const background = container.list[0];
     const { width } = scene.sys.game.config;
     const scale = scene.UtilsGridScale();
     const user = userStore.dataGet;
 
-    const bots = [user, ...botsStore.bots, ...botsStore.losers];
+    const bots = [user, ...botsStore.bots, ]; //...botsStore.losers - если надо рендерить и проигравших
     const contWidth = background.displayWidth;
     const padding = 5 * scale;
     const avatarAreaWidth = contWidth * 0.9;
@@ -53,10 +65,11 @@ function UIMenuDialogWaitingBots(scene) {
 
     let index = 0;
 
-    scene.time.addEvent({
+    let timer = scene.time.addEvent({
         delay: 1000,               // Интервал в мс
         repeat: bots.length - 1,  // повторить (N - 1) раз
         callback: () => {
+            if (!botsStore.bots.length) return timer.remove();
             const bot = bots[index];
             const x = startXAvatars + index * (avatarSize + padding);
             const y = startYAvatars;
@@ -93,7 +106,7 @@ function UIMenuDialogWaitingBots(scene) {
 
 export function UIMenuDialogWaitingShow(show) {
     const { height } = this.sys.game.config;
-    const dialog = this.ui.UIGameDialogWaiting;
+    const dialog = this.ui.UIMenuDialogWaiting;
     const contHeight = dialog.list[0].displayHeight;
 
     if (show) {
@@ -114,6 +127,12 @@ export function UIMenuDialogWaitingShow(show) {
             y: height + contHeight / 2,
             duration: 300,
             ease: 'Cubic.easeIn',
+            onComplete: () => {
+                // пересоздадим конт весь что бы сброить нарисованых ботов
+                this.UIMenuPlayShow(true)
+                this.ui.UIMenuDialogWaiting.destroy(true);
+                this.UIMenuDialogWaiting();
+            }
         });
     }
 }

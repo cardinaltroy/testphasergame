@@ -3,6 +3,8 @@ import engineStore from "../../../store/engineStore";
 import userStore from "../../../store/userStore";
 
 export function UIGameBots() {
+    if (this.ui.UIGameBotsContainers !== null || this.GetCompletedCard() === 0) return;
+
     const { width } = this.sys.game.config;
     const bots = botsStore.getCurrentBots;
     const scale = this.UtilsGridScale();
@@ -51,13 +53,18 @@ export function UIGameBots() {
     };
 
     // Игрок
-    const player = bots[0];
-    const { container: userContainer, cardsText: userCardsText } = createContainer("PLAYER", userStore.userImg, this.GetCompletedCard());
+    const user = userStore.dataGet;
+    const userFinishedCards = this.GetCompletedCard();
+    const { container: userContainer, cardsText: userCardsText } = createContainer(user.name, user.img, userFinishedCards);
     this.uiGameBotsUser = userCardsText;
     this.ui.UIGameBotsContainers.push(userContainer);
 
     // Боты
     bots.forEach(bot => {
+        //ставим столько карт сколько и у игрока
+        if (userFinishedCards !== 0 && bot.cardsFinished === 0) bot.cardsFinished = userFinishedCards;
+
+
         const { container, cardsText } = createContainer(bot.name, `bot_${bot.img}`, bot.cardsFinished);
         bot.textCars = cardsText;
         container.cardsFinished = bot.cardsFinished;
@@ -69,6 +76,7 @@ export function UIGameBots() {
 
 
 export function UIGameBotsUpdate() {
+    if (this.ui.UIGameBotsContainers === null) return;
     const { width } = this.sys.game.config;
     const scale = this.UtilsGridScale();
     const panelSpacing = 10;

@@ -4,7 +4,7 @@ import engineStore from '../../../store/engineStore';
 export function GetUserHint(AFK = true) {
     const availableMoves = []; // Список доступных ходов
 
-    // находим все доступные ходы, как в UpdateCellHints, но добавляем в availableMoves
+    // Собираем все возможные ходы
     for (const cell of this.grid) {
         if (cell.occupied) continue;
 
@@ -16,76 +16,54 @@ export function GetUserHint(AFK = true) {
             const nextValue = value + 1;
 
             if (nextValue <= this.cardsValues) {
-                // находим подходящую карту для этой клетки
-                let hintText;
-                switch (nextValue) {
-                    case 11: hintText = 'J'; break;
-                    case 12: hintText = 'Q'; break;
-                    case 13: hintText = 'K'; break;
-                    default: hintText = nextValue.toString(); break;
-                }
-
-                // Сохраняем информацию о нужной карте, чтобы спавнить стрелку над ней
-                availableMoves.push({ leftCard, nextValue, cell, hintText });
+                availableMoves.push({ leftCard, nextValue, cell });
             }
         }
     }
 
+    if (availableMoves.length === 0) return;
 
-    // eсли нет доступных ходов, ничего не делаем
-    if (availableMoves.length === 0) {
-        return;
-    }
-
-    // Удаляем старую стрелку, если она есть
     if (this.arrowHint) {
         this.arrowHint.destroy();
         this.arrowHint = null;
     }
 
-    // за афк срабатывание не запускаем анимацию снятие денег
     if (!AFK) {
         const { width } = this.sys.game.config;
-
         this.EffectMinusCash(engineStore.userHintPrice, width / 2 + 30);
     }
 
-
-
-    //список доступных ходов для отладки
-    // console.log('Доступные ходы:', availableMoves);
-
-    // Функция для проверки, может ли карта быть поставлена на своё финальное место
     const isCardAtFinalPosition = (card, nextValue, leftCard) => {
-        const finalRow = nextValue - 1; // строка для карты, например, 1 для "2", 2 для "3" и так далее
+        const finalRow = nextValue - 1;
         const finalCell = this.grid.find(c => c.row === finalRow && c.col === leftCard.getData('col'));
-
-        return finalCell && finalCell.card === card; // Проверяем, что карта уже на своём месте
+        return finalCell && finalCell.card === card;
     };
 
-    // Попытаемся найти карту, которая уже на своём финальном месте
-    const cardAtFinalPosition = availableMoves.find(({ leftCard, nextValue }) => {
-        const targetCard = this.grid
-            .find(c => c.card && c.card.getData('value') === nextValue && c.card.getData('suit') === leftCard.getData('suit'));
-
-        // Проверка, может ли эта карта быть поставлена на своё финальное место
-        if (targetCard) {
-            return isCardAtFinalPosition(targetCard.card, nextValue, leftCard);
-        }
-        return false;
+    // Фильтруем только те карты, которые на финальном месте
+    const finalCandidates = availableMoves.filter(({ leftCard, nextValue }) => {
+        const target = this.grid.find(c =>
+            c.card &&
+            c.card.getData('value') === nextValue &&
+            c.card.getData('suit') === leftCard.getData('suit')
+        );
+        return target && isCardAtFinalPosition(target.card, nextValue, leftCard);
     });
 
-    // Если такая карта найдена, используем её, иначе используем первую доступную карту
-    const { leftCard, nextValue, cell, hintText } = cardAtFinalPosition || availableMoves[0];
+    // Сортируем (финальные или обычные) по наименьшему nextValue
+    const sorted = (finalCandidates.length ? finalCandidates : availableMoves)
+        .sort((a, b) => a.nextValue - b.nextValue);
 
-    // Ищем, какая карта подходит для этого хода
-    const targetCard = this.grid
-        .find(c => c.card && c.card.getData('value') === nextValue && c.card.getData('suit') === leftCard.getData('suit'));
+    const { leftCard, nextValue, cell } = sorted[0];
 
-    // Если подходящая карта найдена, создаем стрелку
-    if (targetCard) {
-        const cardPosition = targetCard.card;
-        //  cпавним стрелку над картой, которая подходит
+    const targetCardCell = this.grid.find(c =>
+        c.card &&
+        c.card.getData('value') === nextValue &&
+        c.card.getData('suit') === leftCard.getData('suit')
+    );
+
+    if (targetCardCell) {
+        const cardPosition = targetCardCell.card;
+
         this.arrowHint = this.add.image(
             cardPosition.x + (cardPosition.width / 4),
             cardPosition.y - 10 - (cardPosition.displayHeight / 2),
@@ -98,11 +76,9 @@ export function GetUserHint(AFK = true) {
             .setDepth(505)
             .setScale(0.5);
 
-        //  cохраняем ячейку, куда нужно положить карту
         this.arrowHint.targetCell = cell;
-        this.arrowHint.targetCard = targetCard;
+        this.arrowHint.targetCard = targetCardCell;
 
-        // Добавляем анимацию мигания стрелки
         this.tweens.add({
             targets: this.arrowHint,
             alpha: 0.3,
@@ -111,7 +87,5 @@ export function GetUserHint(AFK = true) {
             repeat: -1,
             ease: 'Sine.easeInOut'
         });
-    } else {
-        // console.log('Не найдена подходящая карта для подсказки!');
     }
 }

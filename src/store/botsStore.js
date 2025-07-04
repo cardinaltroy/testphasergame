@@ -10,22 +10,21 @@ class botsStore {
         this.currentRound = 0;
         this.roundsFinished = 0
 
-        this.botsPlaySpeed = 5;
-        this.botsPlaySpeedTolerance = 1;
+        this.botsPlaySpeed = 4;
+        this.botsPlaySpeedTolerance = 2;
         this.botsSpawnMax = 3;
     }
 
     initNextRound(winner = false) {
-        //ПОбежадет бот, дропаем всё
+        // Побеждает бот — дропаем всё
         if (winner.isBot) return this.clearAll();
 
         this.pause = true;
 
-        // Если ботов вообще нет — первый раунд
+        // Первый раунд — спавним ботов
         if (!this.bots.length && this.currentRound === 0) {
             this.spawn(this.botsSpawnMax, true);
             this.currentRound++;
-            //console.log('Спавним ботов. Раунд', this.currentRound);
             return;
         }
 
@@ -45,18 +44,21 @@ class botsStore {
             const [loserBot] = this.bots.splice(loserIndex, 1);
             loserBot.loser = true;
             this.losers.push(loserBot);
-            //console.log(`${loserBot.name} проиграл(а) и исключён(а)`);
         }
 
         this.currentRound++;
-        //console.log('Следующий раунд', this.currentRound);
 
-        // Если все боты уже проиграли — выход
+        // Сбрасываем cardsFinished всем оставшимся ботам
+        for (const bot of this.bots) {
+            bot.cardsFinished = 0;
+        }
+
+        // Если все боты уже проиграли — конец
         if (!this.bots.length && this.losers.length) {
-            //console.log('Все боты проиграли');
             return this.clearAll();
         }
     }
+
 
     setPause(value = true) {
         this.pause = value;
@@ -66,9 +68,7 @@ class botsStore {
         if (this.pause) return;
 
         if (!this.bots.length) return;
-
         this.bots.forEach(bot => {
-
             if (bot.cardsFinished === bot.maxCards) {
                 //this.clearAll();
                 return engineStore.finishGame(bot);
@@ -95,6 +95,7 @@ class botsStore {
         if (!amount || amount === 0) return null;
         if (clearSpawn) this.bots = [];
 
+
         let shuffled = [...botsList].sort(() => 0.5 - Math.random());
         let maxCards = engineStore.cards * 4;
         let randomCards = engineStore.random;
@@ -102,6 +103,7 @@ class botsStore {
         let randFunc = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
         const selectedBots = shuffled.slice(0, amount).map(bot => {
+            /*
             // "Идеально собранное" число карт, без погрешности
             let cardsPerfectFinished = maxCards * (100 - randomCards) / 100;
             // Погрешность ±10%
@@ -112,12 +114,12 @@ class botsStore {
             cardsFinished = Math.max(
                 randFunc(4, 7),
                 Math.min(cardsFinished, maxCards) - 1// -1 чтобы не было 100% складенных карт
-            );
+            );*/
 
             return {
                 ...bot,
                 maxCards, // макс карт всего
-                cardsFinished, // сколько карт уже складеных
+                cardsFinished: 0, // сколько карт уже складеных. Переделано что бы у всех одинаково было в начале
                 loser: false, // ещё не проиграл
                 isBot: true,
 
@@ -133,6 +135,11 @@ class botsStore {
 
         this.bots = selectedBots;
         return selectedBots;
+    }
+    giveCardsToBots(value) {
+        if (!value || value < 0) return;
+
+        this.bots.forEach(bot => bot.cardsFinished = value)
     }
 
     clearAll() {
