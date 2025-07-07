@@ -64,7 +64,7 @@ export function UIGameDialogExit() {
         .on('pointerdown', funcNo)
 
     // Создаём контейнер внизу за экраном
-    this.ui.UIGameDialogExit = this.add.container(startX, height + contHeight / 2, [
+    this.ui.UIGameDialogExit = this.add.container(startX, height + contHeight, [
         background, title, buttonYes, buttonYesTitle, buttonNo, buttonNoTitle, buttonClose,
     ])
         .setDepth(1000);
@@ -88,7 +88,7 @@ export function UIGameDialogExitShow(show) { // true - open / false - hidden
         // Скрыть — сдвинуть вниз за экран
         this.tweens.add({
             targets: dialog,
-            y: height + contHeight / 2,
+            y: height + contHeight,
             duration: 300,
             ease: 'Cubic.easeIn',
         });
