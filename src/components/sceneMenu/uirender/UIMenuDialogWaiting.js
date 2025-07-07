@@ -38,7 +38,7 @@ export function UIMenuDialogWaiting() {
         })
 
     // Пустой контейнер
-    this.ui.UIMenuDialogWaiting = this.add.container(startX, height + contHeight / 2, [
+    this.ui.UIMenuDialogWaiting = this.add.container(startX, height + contHeight, [
         background, title, titleRound, buttonClose
     ]).setDepth(1000);
 
@@ -124,7 +124,7 @@ export function UIMenuDialogWaitingShow(show) {
     } else {
         this.tweens.add({
             targets: dialog,
-            y: height + contHeight / 2,
+            y: height + contHeight,
             duration: 300,
             ease: 'Cubic.easeIn',
             onComplete: () => {
