@@ -30,7 +30,7 @@ export function RenderUserFrameMove(button) {
     const targetX = button.x;
     const targetY = button.y - 50;
 
-    // Останавливаем старую покачивающую анимацию
+    // стопаем старую покачивающую анимацию
     if (this.userContainer._floatTween) {
         this.userContainer._floatTween.stop();
     }
@@ -42,6 +42,7 @@ export function RenderUserFrameMove(button) {
         duration: 500,
         ease: 'Sine.easeInOut',
         onComplete: () => {
+            //перешли на новый уровень, сбрасываем флаг что бы анимации перехода ещё раз не было
             engineStore.targetId = null;
 
             // Запускаем новую анимацию покачивания на новой позиции

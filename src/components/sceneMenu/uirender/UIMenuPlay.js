@@ -21,12 +21,7 @@ export function UIMenuPlay() {
     this.ui.UIMenuPlay = this.add.container(posX, posY, [buttPlay, textPlay])
 
     buttPlay.on('pointerdown', () => {
-        let lvlPlay = gameMap[engineStore.levelsFinished.length];
-
-        engineStore.setDifficult(lvlPlay.cards, lvlPlay.random, lvlPlay.id);
-        botsStore.initNextRound();
-        this.UIMenuDialogWaitingShow(true)
-        this.UIMenuPlayShow(false);
+        this.start()
     })
 }
 

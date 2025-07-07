@@ -25,6 +25,8 @@ export function RenderCardsRevealAnimation() {
 
                     this.UpdateCellHints();
                     this.CheckFinishedLines();
+                    
+                    this.isLevelStarted = true;
                 }
             });
         });

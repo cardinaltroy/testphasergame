@@ -91,6 +91,27 @@ class botsStore {
         return this.bots;
     }
 
+    getBotStepTime() {
+        const minCards = 4;
+        const maxCards = 13;
+        const cardsInRow = engineStore.cards;
+
+        // ограничим диапазон
+        let range = Math.max(minCards, Math.min(maxCards, cardsInRow));
+
+        // среднее время и погрешность
+        let dt = (range - minCards) / (maxCards - minCards);
+        let avgTime = 3 + (12 - 3) * dt;// от 3 до 12 сек
+        let tolerance = 2 + (8 - 2) * dt;// от ±2 до ±8 сек
+
+        // Генерируем случайное время в пределах (avg ± tolerance)
+        let minTime = avgTime - tolerance;
+        let maxTime = avgTime + tolerance;
+
+        return Math.random() * (maxTime - minTime) + minTime;
+    }
+
+
     spawn(amount, clearSpawn = false) {
         if (!amount || amount === 0) return null;
         if (clearSpawn) this.bots = [];
@@ -98,23 +119,8 @@ class botsStore {
 
         let shuffled = [...botsList].sort(() => 0.5 - Math.random());
         let maxCards = engineStore.cards * 4;
-        let randomCards = engineStore.random;
-
-        let randFunc = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
         const selectedBots = shuffled.slice(0, amount).map(bot => {
-            /*
-            // "Идеально собранное" число карт, без погрешности
-            let cardsPerfectFinished = maxCards * (100 - randomCards) / 100;
-            // Погрешность ±10%
-            let deviation = (Math.random() * 0.2 - 0.1); // от -0.1 до +0.1
-            let cardsFinished = Math.round(cardsPerfectFinished * (1 + deviation));
-
-            // Ограничим допустимые значения от 4 до 7
-            cardsFinished = Math.max(
-                randFunc(4, 7),
-                Math.min(cardsFinished, maxCards) - 1// -1 чтобы не было 100% складенных карт
-            );*/
 
             return {
                 ...bot,
@@ -125,11 +131,7 @@ class botsStore {
 
                 lastStep: 0,
                 timeoutStep: 0,
-                timeoutStepUpdate: () =>
-                    randFunc(
-                        this.botsPlaySpeed - this.botsPlaySpeedTolerance,
-                        this.botsPlaySpeed + this.botsPlaySpeedTolerance
-                    )
+                timeoutStepUpdate: () => this.getBotStepTime()
             };
         });
 

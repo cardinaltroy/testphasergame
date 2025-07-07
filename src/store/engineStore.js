@@ -1,5 +1,3 @@
-import UIMenu from "../components/sceneMenu/UIMenu";
-import UIGame from "../components/sceneGame/UIGame";
 import Phaser from 'phaser';
 
 class engineStore {
@@ -10,18 +8,13 @@ class engineStore {
         this.uiFontColorSecondary = ''
 
         this.game/* : PhaserGame | null */ = null;
+        this.gameScene = 'sceneMenu'; // Стартовый UI 
         this.cards = 6; // колво карт в ряду
         this.random = 100; // шанс смешивания карт, чем меньше тем меньше карт перетасовано меж собой
-        this.lastId = 0;
+        this.lastId = 0; // последний уровень который запускали
         this.targetId = null;//для анимации
-        this.levelsFinished = [];
+        this.levelsFinished = []; //тут колво звёзд за каждый пройденный уровень
 
-        //Удалить весь react UI
-        this.uiCurrent = 'sceneMenu'; // Стартовый UI 
-        this.uiScenes = { // к каждой сцене свой UI подключаем
-            sceneMenu: <UIMenu />,
-            sceneGame: <UIGame />,
-        };
 
         //user temp stats
         this.userPlayTIme = 0; // игровое время в раунде
@@ -35,7 +28,7 @@ class engineStore {
     }
     update() {
         this.userPlayTIme += 1;
-        if (this.game && this.uiCurrent === 'sceneGame') {
+        if (this.game && this.gameScene === 'sceneGame') {
             let scene = this.game.scene.getScene('sceneGame');
             if (scene.ui.UIGameBotsContainers === null) return;
             scene.uiGameBotsUser.setText(`${scene.GetCompletedCard()}/${this.cards * 4}`)
@@ -44,14 +37,14 @@ class engineStore {
     unmount() {
         // when canvas unmount
         this.game = null;
-        this.uiCurrent = 'sceneMenu'; // краще буде с null та обробляти його але це прототип лише, тай взагалі needed typescript for this :)
+        this.gameScene = 'sceneMenu';
     }
 
     setLevelStars(lvl, stars) {
         if (!stars) return;
 
         // Проверяем, новый ли уровень
-        const isNewLevel = lvl >= this.levelsFinished.length;
+        const isNewLevel = lvl >= this.levelsFinished.length && stars === 3;
 
         // Расширяем массив, если нужно
         while (this.levelsFinished.length <= lvl) {
@@ -69,22 +62,6 @@ class engineStore {
         }
     }
 
-
-    get getUI() {
-        let target = this.uiCurrent;
-        if (!this.uiScenes[target]) return null;
-
-        return this.uiScenes[target];
-    }
-
-    setUI(sceneName) {
-        if (!sceneName || !this.uiScenes[sceneName]) return null;
-
-        this.uiCurrent = sceneName;
-
-        return this.uiCurrent;
-    }
-
     get getGame() {
         return this.game;
     }
@@ -97,35 +74,35 @@ class engineStore {
     }
 
     setScene(sceneName) { // Абстракція для спрощення перемикання сцен + інтерфейсу
-        if (!sceneName || !this.uiScenes[sceneName] || this.game === null) return null;
+        if (!sceneName || this.game === null) return null;
 
-        this.game.scene.stop(this.uiCurrent);
+        this.game.scene.stop(this.gameScene);
         this.game.scene.start(sceneName);
-        this.setUI(sceneName);
+        this.gameScene = sceneName;
     }
-    //GAME
-    finishGame(winner) {
-        if (this.uiCurrent !== 'sceneGame' || !winner) return;
+    //GAME // удалить и использовать в sceneGame ( остаток после реакта )
+    finishGame(winner) { 
+        if (this.gameScene !== 'sceneGame' || !winner) return;
 
         let scene = this.game.scene.getScene('sceneGame');
         scene.finish(winner);
     }
     undoMove() {
-        if (this.uiCurrent !== 'sceneGame') return;
+        if (this.gameScene !== 'sceneGame') return;
 
         let scene = this.game.scene.getScene('sceneGame');
         scene.UndoMove();
     }
     shuffleLastCards() {
         // перемешиваем карты кроме заблокированых
-        if (this.uiCurrent !== 'sceneGame' || this.userCash < this.userShufflesPrice) return;
+        if (this.gameScene !== 'sceneGame' || this.userCash < this.userShufflesPrice) return;
 
         let scene = this.game.scene.getScene('sceneGame');
         this.userCash -= this.userShufflesPrice;
         scene.RefreshLastCards()
     }
     showUserHint() {
-        if (this.uiCurrent !== 'sceneGame') return;
+        if (this.gameScene !== 'sceneGame') return;
         let scene = this.game.scene.getScene('sceneGame');
         this.userCash -= this.userHintPrice;
         scene.GetUserHint(false);

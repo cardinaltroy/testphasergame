@@ -2,6 +2,8 @@ export function RenderWinnerScreen(winner, round) {
     const { width, height } = this.sys.game.config;
     const isBot = winner.isBot;
     const scale = this.UtilsGridScale();
+    //очищаем поле от подсказок
+    this.ClearCellHints()
 
     // Фон
     const background = this.add.rectangle(width / 2, height / 2, width, height, 0x000000)
@@ -61,7 +63,7 @@ export function RenderWinnerScreen(winner, round) {
 
 
         // Текст победителя
-        const winnerTitle = this.add.text(width / 2, height / 2 - 75, `Player ${winner.name}`, {
+        const winnerTitle = this.add.text(width / 2, height / 2 - 75, `ROUND WINNER`, {
             fontSize: '36px',
             fontFamily: 'Arial',
             color: '#ffffff',
@@ -72,7 +74,7 @@ export function RenderWinnerScreen(winner, round) {
             .setAlpha(0)
             .setScale(0.8);
 
-        const winnerText = this.add.text(width / 2, height / 2 + 25, `was the first to collect solitaire`, {
+        const winnerText = this.add.text(width / 2, height / 2 + 25, `${winner.name.toUpperCase()}`, {
             fontSize: '36px',
             fontFamily: 'Arial',
             color: '#ffffff',

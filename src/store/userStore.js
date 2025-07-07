@@ -1,17 +1,18 @@
 class userStore {
     constructor() {
         this.userName = 'PLAYER!'
-        this.userImg = 'bot_ma0000'
+        this.userImg = 'user'
     }
-    update() { }
-    dataSave() { }
-    dataLoad() { }
     get dataGet() {
         return {
             name: this.userName,
             img: this.userImg,
         }
     }
+    update() { }
+    dataSave() { }
+    dataLoad() { }
+
 }
 
 export default new userStore()

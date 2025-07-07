@@ -34,7 +34,6 @@ const GameCanvas = () => {
 
 
     return <>
-        {engineStore.getUI}
         <div ref={gameRef} />
     </>;
 };

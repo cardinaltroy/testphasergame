@@ -68,6 +68,8 @@ class sceneMenu extends Phaser.Scene {
         }
         this.load.image('bot_panel', './bots/bot_panel.png');
         this.load.image('bot_cards', './bots/cards.png');
+        //user
+        this.load.image('user', './bots/user.jpg');
 
 
         //others
@@ -100,6 +102,19 @@ class sceneMenu extends Phaser.Scene {
 
         // for debag coords
         //this.input.on('pointerdown', pointer => { console.log(`x: ${pointer.worldX.toFixed(0)}, y: ${pointer.worldY.toFixed(0)}`); });
+    }
+
+    start(lvlOther = false) { // принудительно конкретный уровень запускаем
+        let lvlId = engineStore.levelsFinished.lastIndexOf(3) + 1
+        if(lvlOther) lvlId = lvlOther;
+
+        let lvlPlay = gameMap[lvlId];
+
+        engineStore.setDifficult(lvlPlay.cards, lvlPlay.random, lvlPlay.id);
+        botsStore.initNextRound();
+        this.UIMenuDialogWaitingShow(true)
+        this.UIMenuPlayShow(false);
+        console.log(`Tournament #${lvlPlay.id+1} is started!`)
     }
 }
 

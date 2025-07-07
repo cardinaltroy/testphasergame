@@ -27,6 +27,7 @@ import { UIGameBots, UIGameBotsUpdate } from './uirender/UIGameBots';
 import { EffectMinusCash } from './render/EffectMinusCash';
 import { GetCompletedCard } from './methods/GetCompletedCard';
 import { UIGameDialogExit, UIGameDialogExitShow } from './uirender/UIGameDialogExit';
+import { ClearCellHints } from './methods/ClearCellHints';
 
 export class sceneGame extends Phaser.Scene {
     //ПО НЕМНОГУ РЕФАКТОРИМ ПРОЕКТ
@@ -55,6 +56,7 @@ export class sceneGame extends Phaser.Scene {
         this.CreateGrid = CreateGrid.bind(this);
         this.CreateCards = CreateCards.bind(this);
         this.UpdateCellHints = UpdateCellHints.bind(this);
+        this.ClearCellHints = ClearCellHints.bind(this);
 
         this.UndoMove = UndoMove.bind(this);
         this.RefreshLastCards = RefreshLastCards.bind(this);
@@ -105,9 +107,7 @@ export class sceneGame extends Phaser.Scene {
         this.cardsFree = 1;
         this.columns = this.cardsBase + this.cardsRandom + this.cardsFree;
 
-        this.isLevelStarted = false; //
-        this.LevelStartedTimer = 0;
-        this.LevelStartedTimeMax = engineStore.cards * 4 * 200 / 1000; // приблизительное время расскладки карт на доску.
+        this.isLevelStarted = false; // Начался ли уровень (после анимации прилета карт на доску)
     }
     check() {
         this.IsGameOver();
@@ -115,8 +115,8 @@ export class sceneGame extends Phaser.Scene {
         this.CheckFinishedLines();
     }
     finish(winner) {
-        if (this.lvlFinished) return;
         if (!winner) return;
+        if (this.lvlFinished) return;
 
         let stars = winner.isBot ? botsStore.currentRound - 1 : 3;
 
@@ -263,33 +263,26 @@ export class sceneGame extends Phaser.Scene {
     }
 
     update(time, delta) {
+        if (!this.isLevelStarted) return;
+        //  создаем здесь потому что задаем такое же колво карт как и у игрока
+        this.UIGameBots();
 
         this.elapsed += delta
 
         // Раз в секунду
         if (this.elapsed >= 1000) {
             this.elapsed -= 1000
-            botsStore.bots.length && console.log(botsStore.bots[0].cardsFinished)
-            //Просто апдейтим
+            // апдейтим сторы
             engineStore.update();
+            botsStore.update();
 
-            this.UIGameBots();
+
             this.UIGameBotsUpdate();
-
-            this.isLevelStarted && botsStore.update(); // адпейтим после того как карты разложились
-
-
-            //ждем начало уровня(что бы карты все разложились)
-            if (!this.isLevelStarted) {
-                this.LevelStartedTimer++;
-                if (this.LevelStartedTimer >= this.LevelStartedTimeMax) this.isLevelStarted = true;
-            }
-
-
 
 
             let currentTimeOut = engineStore.userHintTimeouts[engineStore.lastId];
             // например 3 сек юзер не ходил, показываем подсказку, и ждем пока дропнется счетчик для нового афк отсчета 
+            console.log(currentTimeOut)
             if (currentTimeOut) {
                 if (this.afkTimer < currentTimeOut) {
                     //console.log(this.afkTimer)
