@@ -2,6 +2,7 @@ import userStore from "../../../store/userStore";
 
 
 export function IsGameOver() {
+    //console.log('isgameover')
     const rows = 4;
     const sequence = [];
 
@@ -28,11 +29,11 @@ export function IsGameOver() {
             if (c.card) sequence.push(c.card);
         });
     }
-
+    //console.log(sequence.length)
+    
     if (sequence.length === 0) return;
 
     //рендерим анимацию сбора карт
     let user = userStore.dataGet;
-
     this.finish({ name: user.name, isBot: false })
 }

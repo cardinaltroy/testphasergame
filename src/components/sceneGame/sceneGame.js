@@ -108,11 +108,12 @@ export class sceneGame extends Phaser.Scene {
         this.columns = this.cardsBase + this.cardsRandom + this.cardsFree;
 
         this.isLevelStarted = false; // Начался ли уровень (после анимации прилета карт на доску)
+        this.lvlFinished = false;
     }
     check() {
-        this.IsGameOver();
         this.UpdateCellHints();
         this.CheckFinishedLines();
+        this.IsGameOver();
     }
     finish(winner) {
         if (!winner) return;
@@ -127,21 +128,21 @@ export class sceneGame extends Phaser.Scene {
 
 
         if (winner.isBot) {
-            //console.log(`турнир №${engineStore.lastId + 1} закончился победой бота ${winner.name}, у игрока звёзд: ${stars}`)
+            console.log(`турнир №${engineStore.lastId + 1} закончился победой бота ${winner.name}, у игрока звёзд: ${stars}`)
             engineStore.setLevelStars(engineStore.lastId, stars);
 
             return this.time.delayedCall(6000, () => {
                 engineStore.setScene('sceneMenu')
             });
         } else if (botsStore.currentRound === 0) {
-            //console.log(`турнир №${engineStore.lastId + 1} закончился победой игрока ${winner.name}, у игрока звёзд: ${stars}`)
+            console.log(`турнир №${engineStore.lastId + 1} закончился победой игрока ${winner.name}, у игрока звёзд: ${stars}`)
             engineStore.setLevelStars(engineStore.lastId, stars);
 
             return this.time.delayedCall(6000, () => {
                 engineStore.setScene('sceneMenu')
             });
         } else {
-            //console.log('следующий раунд')
+            console.log('следующий раунд')
         }
 
         this.time.delayedCall(3000, () => {
@@ -263,21 +264,22 @@ export class sceneGame extends Phaser.Scene {
     }
 
     update(time, delta) {
-        if (!this.isLevelStarted) return;
-        //  создаем здесь потому что задаем такое же колво карт как и у игрока
-        this.UIGameBots();
 
         this.elapsed += delta
 
         // Раз в секунду
         if (this.elapsed >= 1000) {
             this.elapsed -= 1000
-            // апдейтим сторы
+            //Просто апдейтим
             engineStore.update();
-            botsStore.update();
 
-
+            this.UIGameBots();
             this.UIGameBotsUpdate();
+
+            this.isLevelStarted && botsStore.update(); // адпейтим после того как карты разложились
+
+
+
 
 
             let currentTimeOut = engineStore.userHintTimeouts[engineStore.lastId];

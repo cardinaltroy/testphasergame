@@ -54,7 +54,6 @@ export function RenderUserLevels() {
         let target = engineStore.targetId;
 
         if (target !== null) {// с анимацией
-            console.log(lastDrawPoint, target)
             point.id === lastDrawPoint && this.RenderUserFrame(button, scale);
             point.id === lastDrawPoint + 1 && this.RenderUserFrameMove(button);
         } else {//без анимации

@@ -10,6 +10,7 @@ export function RenderCardsGameOver() {
     const centerX = this.cameras.main.centerX;
     const centerY = this.cameras.main.height + 200;
 
+
     this.lvlFinished = true;
 
     sequence.reverse().forEach((card, i) => {
@@ -30,11 +31,7 @@ export function RenderCardsGameOver() {
             delay: i * 100,
             onComplete: () => {
                 if (i === sequence.length - 1) {
-                    this.time.delayedCall(300, () => {
-                        //engineStore.setScene('sceneMenu');
-                        this.lvlFinished = false;
-
-                    });
+                    this.lvlFinished = false;
                 }
             }
         });

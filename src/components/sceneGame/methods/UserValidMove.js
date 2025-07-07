@@ -43,6 +43,6 @@ export function UserValidMove(pointer, card, nearest, oldCell) {
     engineStore.addScores();
 
     this.check()
-    console.log('start anim', this.GetCompletedCard())
-    this.UIGameBotsUpdate();
+    //console.log('uservalidmove')
+    //this.UIGameBotsUpdate();
 }

@@ -130,7 +130,7 @@ class botsStore {
                 isBot: true,
 
                 lastStep: 0,
-                timeoutStep: 0,
+                timeoutStep: this.getBotStepTime(),
                 timeoutStepUpdate: () => this.getBotStepTime()
             };
         });
