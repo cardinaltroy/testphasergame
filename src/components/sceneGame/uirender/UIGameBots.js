@@ -98,6 +98,7 @@ export function UIGameBotsUpdate() {
     // Получаем общее Y (все панели на одной высоте)
     const y = 35 * scale;
 
+    console.log('moveing X')
     // Распределение по X
     this.ui.UIGameBotsContainers.forEach((container, index) => {
         const targetX = startX + index * (panelWidth + panelSpacing);
@@ -106,7 +107,7 @@ export function UIGameBotsUpdate() {
             targets: container,
             x: targetX,
             y: y,
-            duration: 300,
+            duration: 150,
             ease: 'Sine.easeInOut'
         });
     });
