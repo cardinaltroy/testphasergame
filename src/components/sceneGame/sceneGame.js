@@ -266,6 +266,7 @@ export class sceneGame extends Phaser.Scene {
         if (!this.isLevelStarted) return;
         //  создаем здесь потому что задаем такое же колво карт как и у игрока
         this.UIGameBots();
+        this.UIGameBotsUpdate();
 
         this.elapsed += delta
 
@@ -277,7 +278,6 @@ export class sceneGame extends Phaser.Scene {
             botsStore.update();
 
 
-            this.UIGameBotsUpdate();
 
 
             let currentTimeOut = engineStore.userHintTimeouts[engineStore.lastId];
