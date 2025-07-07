@@ -6,7 +6,7 @@ export function RenderUserLevels() {
     const scale = this.background.scale;
     const offsetX = this.background.x;
     const offsetY = 0;
-    const buttonScale = this.sys.game.device.os.android || this.sys.game.device.os.iOS ? 0.7 : 1;
+    const buttonScale = this.UtilsGridScale()*0.85
 
     // Отрисовка кнопок уровней
     gameMap.forEach((point, index) => {

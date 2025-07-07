@@ -282,7 +282,6 @@ export class sceneGame extends Phaser.Scene {
 
             let currentTimeOut = engineStore.userHintTimeouts[engineStore.lastId];
             // например 3 сек юзер не ходил, показываем подсказку, и ждем пока дропнется счетчик для нового афк отсчета 
-            console.log(currentTimeOut)
             if (currentTimeOut) {
                 if (this.afkTimer < currentTimeOut) {
                     //console.log(this.afkTimer)

@@ -3,7 +3,7 @@ import userStore from "../../../store/userStore";
 
 export function RenderUserFrame(button, scale) {
     const userX = button.x;
-    const userY = button.y - 50;
+    const userY = button.y - 50*scale;
 
     const frame = this.add.sprite(0, 0, 'common1', 'ava_user_frame')
         .setOrigin(0.5)
